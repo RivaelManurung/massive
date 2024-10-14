@@ -12,8 +12,14 @@ const ensureCategoryArtikelTableExists = async () => {
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
   `;
-  await dbpool.execute(createTableQuery);
+  try {
+    await dbpool.execute(createTableQuery);
+    console.log("CategoryArtikel table created or already exists.");
+  } catch (error) {
+    console.error("Error creating CategoryArtikel table:", error);
+  }
 };
+ensureCategoryArtikelTableExists();
 
 // Mendapatkan semua kategori artikel
 const getAllCategoryArtikel = async (req, res) => {
@@ -113,4 +119,5 @@ module.exports = {
   createNewCategoryArtikel,
   updateCategoryArtikel,
   deleteCategoryArtikel,
+  ensureCategoryArtikelTableExists
 };
