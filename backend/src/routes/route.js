@@ -2,13 +2,7 @@ const express = require("express");
 const router = express.Router();
 const userController = require("../controller/userController");
 const authenticateJWT = require("../middleware/middleware.js");
-
-const {
-  getAllCategories,
-  createNewCategory,
-  updateCategory,
-  deleteCategory,
-} = require("../controller/categoryController");
+const categoryArtikelController = require("../controller/categoryArtikelController.js");
 
 // Route registrasi
 router.post("/register", userController.createNewUser);
@@ -22,6 +16,7 @@ router.post("/logout", userController.logoutUser);
 // Route untuk mendapatkan semua user (hanya untuk user yang terotentikasi)
 // router.get("/users", authenticateJWT, userController.getAllUser);
 
+// Route untuk mendapatkan semua users
 router.get("/getAllUser", async (req, res) => {
   try {
     const [rows] = await userController.getAllUser();
@@ -34,23 +29,59 @@ router.get("/getAllUser", async (req, res) => {
   }
 });
 
-// Route untuk mendapatkan semua categories
-router.get("/categories", getAllCategories);
+// Route untuk mendapatkan semua kategori artikel
+router.get("/categoryArtikel", async (req, res) => {
+  try {
+    const categories = await categoryArtikelController.getAllCategoryArtikel();
+    res.json(categories);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to retrieve categories",
+      ServerMessage: error,
+    });
+  }
+});
 
-// Route untuk membuat category baru
-router.post("/categories", createNewCategory);
+// Route untuk membuat kategori artikel baru
+router.post("/categoryArtikel", async (req, res) => {
+  try {
+    const newCategory = await categoryArtikelController.createNewCategoryArtikel(req.body);
+    res.json(newCategory);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to create new category",
+      ServerMessage: error,
+    });
+  }
+});
 
-// Route untuk memperbarui category berdasarkan id
-router.put("/categories/:id", updateCategory);
+// Route untuk memperbarui kategori artikel berdasarkan id
+router.put("/categoryArtikel/:id", async (req, res) => {
+  try {
+    const updatedCategory = await categoryArtikelController.updateCategoryArtikel(req.params.id, req.body);
+    res.json(updatedCategory);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to update category",
+      ServerMessage: error,
+    });
+  }
+});
 
-// Route untuk menghapus category berdasarkan id
-router.delete("/categories/:id", deleteCategory);
+// Route untuk menghapus kategori artikel berdasarkan id
+router.delete("/categoryArtikel/:id", async (req, res) => {
+  try {
+    const deletedCategoryId = await categoryArtikelController.deleteCategoryArtikel(req.params.id);
+    res.json({
+      message: "Delete category success",
+      deletedCategoryId: deletedCategoryId,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to delete category",
+      ServerMessage: error,
+    });
+  }
+});
 
 module.exports = router;
-
-
-// {
-//   "name" : "user",
-//   "email": "user@gmail.com",
-//   "password" : "user123"
-// }

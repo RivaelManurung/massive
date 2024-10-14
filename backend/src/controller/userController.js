@@ -1,13 +1,11 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const dbpool = require("../config/database");
+const userModel = require("../models/userModel");
 
-// Mendapatkan semua user
-// Mendapatkan semua user
+// Controller for getting all users
 const getAllUser = async (req, res) => {
   try {
-    const SQLQuery = "SELECT * FROM users";
-    const [users] = await dbpool.execute(SQLQuery);
+    const [users] = await userModel.getAllUsers();
     res.json(users);
   } catch (error) {
     res.status(500).json({
@@ -17,34 +15,24 @@ const getAllUser = async (req, res) => {
   }
 };
 
-// Fungsi untuk registrasi user
+// Controller for creating a new user
 const createNewUser = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, role } = req.body;
 
   try {
-    // Hash password before saving
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert new user into the database
-    const SQLQuery = `
-      INSERT INTO users (name, email, password, created_at, updated_at)
-      VALUES (?, ?, ?, NOW(), NOW())
-    `;
-    const [result] = await dbpool.execute(SQLQuery, [name, email, hashedPassword]);
+    // Default role to 'user' if not provided
+    const userRole = role || 'user';
 
-    // Get the ID of the newly created user
-    const newUserId = result.insertId;
-
-    // Retrieve the newly created user from the database
-    const getUserQuery = "SELECT id, name, email, created_at FROM users WHERE id = ?";
-    const [newUser] = await dbpool.execute(getUserQuery, [newUserId]);
+    // Create new user in the database
+    await userModel.createUser(name, email, hashedPassword, userRole);
 
     res.json({
       message: "CREATE NEW USER SUCCESS",
-      user: newUser[0],
     });
   } catch (error) {
-    // Check if the error is due to a duplicate email
     if (error.code === 'ER_DUP_ENTRY') {
       res.status(400).json({
         message: "CREATE NEW USER FAILED",
@@ -59,35 +47,30 @@ const createNewUser = async (req, res) => {
   }
 };
 
-
-
-// Fungsi untuk login user
+// Controller for user login
 const loginUser = async (req, res) => {
   const { name, password } = req.body;
 
   try {
-    // Cari user di database
-    const SQLQuery = "SELECT * FROM users WHERE name = ?";
-    const [user] = await dbpool.execute(SQLQuery, [name]);
+    // Get user by name
+    const [user] = await userModel.getUserByName(name);
 
     if (user.length === 0) {
       return res.status(400).json({ message: "User not found" });
     }
 
-    // Verifikasi password
+    // Verify password
     const validPassword = await bcrypt.compare(password, user[0].password);
 
     if (!validPassword) {
       return res.status(400).json({ message: "Invalid password" });
     }
 
-    // Buat token JWT
+    // Create JWT token
     const token = jwt.sign(
-      { id: user[0].id, name: user[0].name },
+      { id: user[0].id, name: user[0].name, role: user[0].role },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "1h", // token berlaku selama 1 jam
-      }
+      { expiresIn: "1h" }
     );
 
     res.json({
@@ -102,9 +85,8 @@ const loginUser = async (req, res) => {
   }
 };
 
-// Fungsi untuk logout user (di client-side, biasanya token dihapus)
+// Controller for user logout
 const logoutUser = (req, res) => {
-  // Biasanya logout hanya menghapus token di sisi client
   res.json({ message: "Logout success" });
 };
 

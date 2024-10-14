@@ -8,41 +8,46 @@ const createUsersTable = async () => {
       name VARCHAR(255) NOT NULL,
       email VARCHAR(255) NOT NULL UNIQUE,
       password VARCHAR(255) NOT NULL,
+      role ENUM('admin', 'user') DEFAULT 'user',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
   `;
 
   try {
-    // Execute the query to create the table
     await dbpool.execute(createTableQuery);
     console.log("Users table created or already exists.");
   } catch (error) {
-    console.error("Failed to create users table:", error);
+    console.error("Error creating users table:", error);
   }
 };
 
-// Get all users from the database
-const getAllUser = () => {
+// Function to get all users
+const getAllUsers = () => {
   const SQLQuery = "SELECT * FROM users";
   return dbpool.execute(SQLQuery);
 };
 
-// Create a new user with id, created_at, and updated_at
-const createNewUser = (body) => {
+// Function to create a new user
+const createUser = (name, email, hashedPassword, role) => {
   const SQLQuery = `
-    INSERT INTO users (name, email, password, created_at, updated_at)
-    VALUES (?, ?, ?, NOW(), NOW())
+    INSERT INTO users (name, email, password, role, created_at, updated_at)
+    VALUES (?, ?, ?, ?, NOW(), NOW())
   `;
+  return dbpool.execute(SQLQuery, [name, email, hashedPassword, role]);
+};
 
-  // Use an array to safely pass user input into the SQL query
-  return dbpool.execute(SQLQuery, [body.name, body.email, body.password]);
+// Function to get a user by name
+const getUserByName = (name) => {
+  const SQLQuery = "SELECT * FROM users WHERE name = ?";
+  return dbpool.execute(SQLQuery, [name]);
 };
 
 // Automatically create the users table when the module is loaded
 createUsersTable();
 
 module.exports = {
-  getAllUser,
-  createNewUser,
+  getAllUsers,
+  createUser,
+  getUserByName,
 };
