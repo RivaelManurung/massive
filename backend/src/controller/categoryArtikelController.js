@@ -7,7 +7,6 @@ const ensureCategoryArtikelTableExists = async () => {
     CREATE TABLE IF NOT EXISTS categoryArtikel (
       id INT AUTO_INCREMENT PRIMARY KEY,
       name VARCHAR(255) NOT NULL,
-      description TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
@@ -43,17 +42,17 @@ const getAllCategoryArtikel = async (req, res) => {
 
 // Membuat kategori artikel baru
 const createNewCategoryArtikel = async (req, res) => {
-  const { name, description } = req.body;
+  const { name } = req.body;
   try {
     await ensureCategoryArtikelTableExists();
 
     const SQLQuery = `
-      INSERT INTO categoryArtikel (name, description, created_at, updated_at)
-      VALUES (?, ?, NOW(), NOW())
+      INSERT INTO categoryArtikel (name, created_at, updated_at)
+      VALUES (?, NOW(), NOW())
     `;
-    const [result] = await dbpool.execute(SQLQuery, [name, description]);
+    const [result] = await dbpool.execute(SQLQuery, [name]);
 
-    const newCategoryArtikel = new CategoryArtikel(result.insertId, name, description, new Date(), new Date());
+    const newCategoryArtikel = new CategoryArtikel(result.insertId, name, new Date(), new Date());
     res.json({
       message: "CREATE NEW CATEGORY ARTIKEL SUCCESS",
       categoryArtikel: newCategoryArtikel,
@@ -69,18 +68,18 @@ const createNewCategoryArtikel = async (req, res) => {
 // Memperbarui kategori artikel
 const updateCategoryArtikel = async (req, res) => {
   const { id } = req.params;
-  const { name, description } = req.body;
+  const { name } = req.body;
   try {
     await ensureCategoryArtikelTableExists();
 
     const SQLQuery = `
       UPDATE categoryArtikel
-      SET name = ?, description = ?, updated_at = NOW()
+      SET name = ? , updated_at = NOW()
       WHERE id = ?
     `;
-    await dbpool.execute(SQLQuery, [name, description, id]);
+    await dbpool.execute(SQLQuery, [name, id]);
 
-    const updatedCategoryArtikel = new CategoryArtikel(id, name, description, null, new Date());
+    const updatedCategoryArtikel = new CategoryArtikel(id, name, null, new Date());
     res.json({
       message: "UPDATE CATEGORY ARTIKEL SUCCESS",
       categoryArtikel: updatedCategoryArtikel,
