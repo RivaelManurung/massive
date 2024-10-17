@@ -1,20 +1,20 @@
 const dbpool = require("../config/database");
 const VideoTutorial = require("../models/videoTutorialModel");
 
+// Membuat tabel jika belum ada
 const ensureVideoTutorialTableExists = async () => {
   const createTableQuery = `
-        CREATE TABLE IF NOT EXISTS videoTutorial (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            title VARCHAR(255) NOT NULL,
-            description TEXT NOT NULL,
-            videoUrl VARCHAR(255) NOT NULL,
-            categoryVideoId INT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            FOREIGN KEY (categoryVideoId) REFERENCES categoryVideo(id) ON DELETE CASCADE
-        );
-    `;
-
+    CREATE TABLE IF NOT EXISTS videoTutorial (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      title VARCHAR(255) NOT NULL,
+      description TEXT NOT NULL,
+      videoUrl VARCHAR(255) NOT NULL,
+      categoryVideoId INT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      FOREIGN KEY (categoryVideoId) REFERENCES categoryVideo(id) ON DELETE CASCADE
+    );
+  `;
   try {
     await dbpool.execute(createTableQuery);
     console.log("VideoTutorial table created or already exists.");
@@ -32,7 +32,6 @@ const getAllVideoTutorials = async (req, res) => {
       FROM videoTutorial vt
       LEFT JOIN categoryVideo cv ON vt.categoryVideoId = cv.id;
     `;
-
     const [rows] = await dbpool.execute(SQLQuery);
 
     const videos = rows.map(
@@ -59,7 +58,8 @@ const getAllVideoTutorials = async (req, res) => {
 
 // Membuat video tutorial baru
 const createNewVideoTutorial = async (req, res) => {
-  const { title, description, videoUrl, categoryVideoId } = req.body;
+  const { title, description, categoryVideoId } = req.body;
+  const videoUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
   if (!title || !description || !videoUrl) {
     return res.status(400).json({
@@ -72,12 +72,11 @@ const createNewVideoTutorial = async (req, res) => {
       INSERT INTO videoTutorial (title, description, videoUrl, categoryVideoId, created_at, updated_at)
       VALUES (?, ?, ?, ?, NOW(), NOW())
     `;
-
     const [result] = await dbpool.execute(SQLQuery, [
       title,
       description,
       videoUrl,
-      categoryVideoId || null, // Handle null category
+      categoryVideoId || null,
     ]);
 
     const newVideo = new VideoTutorial(
@@ -102,73 +101,10 @@ const createNewVideoTutorial = async (req, res) => {
   }
 };
 
-// Memperbarui video tutorial berdasarkan ID
-const updateVideoTutorial = async (req, res) => {
-  const { id } = req.params;
-  const { title, description, videoUrl, categoryVideoId } = req.body;
-
-  try {
-    const SQLQuery = `
-      UPDATE videoTutorial
-      SET title = ?, description = ?, videoUrl = ?, categoryVideoId = ?, updated_at = NOW()
-      WHERE id = ?
-    `;
-
-    await dbpool.execute(SQLQuery, [
-      title,
-      description,
-      videoUrl,
-      categoryVideoId || null,
-      id,
-    ]);
-
-    const updatedVideo = new VideoTutorial(
-      id,
-      title,
-      description,
-      videoUrl,
-      categoryVideoId,
-      null,
-      new Date()
-    );
-
-    res.json({
-      message: "UPDATE VIDEO TUTORIAL SUCCESS",
-      video: updatedVideo,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "UPDATE VIDEO TUTORIAL FAILED",
-      serverMessage: error.message,
-    });
-  }
-};
-
-// Menghapus video tutorial berdasarkan ID
-const deleteVideoTutorial = async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const SQLQuery = "DELETE FROM videoTutorial WHERE id = ?";
-    await dbpool.execute(SQLQuery, [id]);
-
-    res.json({
-      message: "DELETE VIDEO TUTORIAL SUCCESS",
-      deletedVideoId: id,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "DELETE VIDEO TUTORIAL FAILED",
-      serverMessage: error.message,
-    });
-  }
-};
-
-// Ekspor semua controller
+// Export controller functions
 module.exports = {
   getAllVideoTutorials,
   createNewVideoTutorial,
-  updateVideoTutorial,
-  deleteVideoTutorial,
-  ensureVideoTutorialTableExists,
+  // updateVideoTutorial,
+  // deleteVideoTutorial,
 };
