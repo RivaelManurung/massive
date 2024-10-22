@@ -27,11 +27,11 @@ const Navbar = () => {
               <FaHome className="mr-2" /> Home
             </Link>
           </li>
-          <li>
+          {/* <li>
             <Link to="/categories" className={`flex items-center ${isActive("/categories")}`}>
               <FaList className="mr-2" /> Categories
             </Link>
-          </li>
+          </li> */}
           <li>
             <Link to="/article" className={`flex items-center ${isActive("/article")}`}>
               <FaBook className="mr-2" /> Article
@@ -66,11 +66,11 @@ const Navbar = () => {
                 <FaHome className="mr-2" /> Home
               </Link>
             </li>
-            <li>
+            {/* <li>
               <Link to="/categories" onClick={toggleMenu} className={`flex items-center ${isActive("/categories")}`}>
                 <FaList className="mr-2" /> Categories
               </Link>
-            </li>
+            </li> */}
             <li>
               <Link to="/article" onClick={toggleMenu} className={`flex items-center ${isActive("/article")}`}>
                 <FaBook className="mr-2" /> Article

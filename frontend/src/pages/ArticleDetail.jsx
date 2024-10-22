@@ -41,7 +41,7 @@ const ArticleDetail = () => {
 
   return (
     <div className="p-8 max-w-screen-lg mx-auto">
-      <Link to="/" className="text-blue-600 underline mb-4 inline-block">
+      <Link to="/article" className="text-blue-600 underline mb-4 inline-block">
         &larr; Back to Blog
       </Link>
       <h1 className="text-4xl font-extrabold mb-4">{article.title}</h1>
