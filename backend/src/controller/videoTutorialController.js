@@ -1,7 +1,7 @@
 const dbpool = require("../config/database");
 const VideoTutorial = require("../models/videoTutorialModel");
 
-// Membuat tabel jika belum ada
+// Ensure the videoTutorial table exists
 const ensureVideoTutorialTableExists = async () => {
   const createTableQuery = `
     CREATE TABLE IF NOT EXISTS videoTutorial (
@@ -24,7 +24,7 @@ const ensureVideoTutorialTableExists = async () => {
 };
 ensureVideoTutorialTableExists();
 
-// Mendapatkan semua video tutorial
+// Get all video tutorials
 const getAllVideoTutorials = async (req, res) => {
   try {
     const SQLQuery = `
@@ -33,6 +33,10 @@ const getAllVideoTutorials = async (req, res) => {
       LEFT JOIN categoryVideo cv ON vt.categoryVideoId = cv.id;
     `;
     const [rows] = await dbpool.execute(SQLQuery);
+
+    if (rows.length === 0) {
+      return res.json([]); // Return an empty array if no videos found
+    }
 
     const videos = rows.map(
       (row) =>
@@ -56,8 +60,48 @@ const getAllVideoTutorials = async (req, res) => {
   }
 };
 
-// Membuat video tutorial baru
+// Get video tutorial by ID
+const getVideoTutorialById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const SQLQuery = `
+      SELECT vt.*, cv.name AS categoryName
+      FROM videoTutorial vt
+      LEFT JOIN categoryVideo cv ON vt.categoryVideoId = cv.id
+      WHERE vt.id = ?;
+    `;
+    const [rows] = await dbpool.execute(SQLQuery, [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        message: "Video tutorial not found.",
+      });
+    }
+
+    const video = new VideoTutorial(
+      rows[0].id,
+      rows[0].title,
+      rows[0].description,
+      rows[0].videoUrl,
+      rows[0].categoryVideoId,
+      rows[0].created_at,
+      rows[0].updated_at
+    );
+
+    res.json(video);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to retrieve video tutorial",
+      serverMessage: error.message,
+    });
+  }
+};
+
+// Create a new video tutorial
 const createNewVideoTutorial = async (req, res) => {
+  console.log("Request Body:", req.body);
+  console.log("Uploaded File:", req.file);
   const { title, description, categoryVideoId } = req.body;
   const videoUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
@@ -104,7 +148,6 @@ const createNewVideoTutorial = async (req, res) => {
 // Export controller functions
 module.exports = {
   getAllVideoTutorials,
+  getVideoTutorialById, // Export the new function
   createNewVideoTutorial,
-  // updateVideoTutorial,
-  // deleteVideoTutorial,
 };

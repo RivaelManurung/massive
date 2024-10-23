@@ -2,10 +2,10 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
-// import Categories from "./pages/Categories";
 import Article from "./pages/Article";
 import ArticleDetail from "./pages/ArticleDetail";
-// import VideoTutorial from "./pages/VideoTutorial";
+import Videos from "./pages/Videos"; // Importing Videos component
+import VideoDetail from "./pages/VideoDetail"; // Ensure to import VideoDetail component
 import Forum from "./pages/Forum";
 
 function App() {
@@ -16,10 +16,10 @@ function App() {
         <div className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
-            {/* <Route path="/categories" element={<Categories />} /> */}
             <Route path="/article" element={<Article />} />
             <Route path="/article/:id" element={<ArticleDetail />} />
-            {/* <Route path="/videos" element={<VideoTutorial />} /> */}
+            <Route path="/videos" element={<Videos />} />
+            <Route path="/video/:id" element={<VideoDetail />} />
             <Route path="/forum" element={<Forum />} />
           </Routes>
         </div>

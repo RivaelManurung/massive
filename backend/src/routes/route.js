@@ -4,6 +4,7 @@ const {
   authenticateJWT,
   adminMiddleware,
 } = require("../middleware/middleware.js");
+const upload = require("../middleware/uploadMiddleware");
 const userController = require("../controller/userController");
 const categoryArtikelController = require("../controller/categoryArtikelController");
 const artikelController = require("../controller/artikelController");
@@ -81,12 +82,21 @@ router.delete(
 
 // --- VIDEO TUTORIAL ROUTES ---
 router.get("/videoTutorial", videoTutorialController.getAllVideoTutorials);
+router.get("/videoTutorial/:id", videoTutorialController.getVideoTutorialById); // New route for getting video by ID
 router.post(
   "/videoTutorial",
   authenticateJWT,
   adminMiddleware,
-  videoTutorialController.createNewVideoTutorial
+  upload.single('videoUrl'), // Ensure the field name matches
+  (req, res) => {
+    if (req.fileValidationError) {
+      return res.status(400).json({ message: req.fileValidationError });
+    }
+    videoTutorialController.createNewVideoTutorial(req, res);
+  }
 );
+
+// Uncomment these routes when you implement the corresponding functions
 // router.put("/videoTutorial/:id", authenticateJWT, adminMiddleware, videoTutorialController.updateVideoTutorial);
 // router.delete("/videoTutorial/:id", authenticateJWT, adminMiddleware, videoTutorialController.deleteVideoTutorial);
 
