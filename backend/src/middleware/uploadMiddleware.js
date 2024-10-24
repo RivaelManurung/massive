@@ -1,28 +1,31 @@
 const multer = require("multer");
 const path = require("path");
 
-// Configure storage
+// Set up storage engine
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Folder to store files
+    cb(null, "uploads/"); // Folder tujuan upload
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Unique file name
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
   },
 });
 
-// Filter to only accept video files
+// Filter format file yang diperbolehkan
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = ["video/mp4", "video/mkv", "video/avi"];
+  const allowedTypes = ["image/jpeg", "image/png", "video/mp4"];
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error("Only video files are allowed!"), false);
+    cb(new Error("Only .jpeg, .png, or .mp4 files are allowed!"), false);
   }
 };
 
-// Create upload instance
-const upload = multer({ storage, fileFilter });
+// Konfigurasi multer untuk upload multiple files
+const upload = multer({
+  storage,
+  fileFilter,
+});
 
-// Export the upload instance
 module.exports = upload;

@@ -35,7 +35,7 @@ const VideoDetail = () => {
       <h2 className="text-4xl font-bold mb-5">{video.title}</h2>
       <iframe
         className="w-full h-96 rounded-md shadow"
-        src={`http://localhost:4000${video.videoUrl}`}
+        src={`http://localhost:4000${video.videoUrl}`} // Ini akan memberikan URL yang tepat
         title={video.title}
         allowFullScreen
       ></iframe>

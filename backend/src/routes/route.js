@@ -61,6 +61,7 @@ router.delete(
 
 // --- CATEGORY VIDEO ROUTES ---
 router.get("/categoryVideo", categoryVideoController.getAllCategoryVideo);
+router.get("/categoryVideo/:id", categoryVideoController.getCategoryVideoById); // New route for getting category video by ID
 router.post(
   "/categoryVideo",
   authenticateJWT,
@@ -87,7 +88,7 @@ router.post(
   "/videoTutorial",
   authenticateJWT,
   adminMiddleware,
-  upload.single('videoUrl'), // Ensure the field name matches
+  upload.fields([{ name: "videoUrl" }, { name: "thumbnailUrl" }]), // Multiple fields
   (req, res) => {
     if (req.fileValidationError) {
       return res.status(400).json({ message: req.fileValidationError });

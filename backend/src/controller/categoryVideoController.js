@@ -41,6 +41,30 @@ const getAllCategoryVideo = async (req, res) => {
   }
 };
 
+// Mendapatkan kategori video berdasarkan ID
+const getCategoryVideoById = async (req, res) => {
+  const { id } = req.params; // Extract the ID from the request parameters
+  try {
+    await ensureCategoryVideoTableExists();
+    const SQLQuery = "SELECT * FROM categoryVideo WHERE id = ?";
+    const [rows] = await dbpool.execute(SQLQuery, [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        message: "Category video not found",
+      });
+    }
+
+    const categoryVideo = new CategoryVideo(rows[0].id, rows[0].name, rows[0].created_at, rows[0].updated_at);
+    res.json(categoryVideo);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to retrieve category video",
+      serverMessage: error.message,
+    });
+  }
+};
+
 // Membuat kategori video baru
 const createNewCategoryVideo = async (req, res) => {
   const { name } = req.body;
@@ -116,6 +140,7 @@ const deleteCategoryVideo = async (req, res) => {
 
 module.exports = {
   getAllCategoryVideo,
+  getCategoryVideoById, // Export the new function
   createNewCategoryVideo,
   updateCategoryVideo,
   deleteCategoryVideo,

@@ -1,7 +1,7 @@
 const dbpool = require("../config/database");
 const VideoTutorial = require("../models/videoTutorialModel");
 
-// Ensure the videoTutorial table exists
+// Pastikan tabel videoTutorial ada dengan kolom thumbnailUrl tidak boleh NULL
 const ensureVideoTutorialTableExists = async () => {
   const createTableQuery = `
     CREATE TABLE IF NOT EXISTS videoTutorial (
@@ -9,6 +9,7 @@ const ensureVideoTutorialTableExists = async () => {
       title VARCHAR(255) NOT NULL,
       description TEXT NOT NULL,
       videoUrl VARCHAR(255) NOT NULL,
+      thumbnailUrl VARCHAR(255) NOT NULL,  -- Tidak boleh NULL
       categoryVideoId INT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -34,10 +35,6 @@ const getAllVideoTutorials = async (req, res) => {
     `;
     const [rows] = await dbpool.execute(SQLQuery);
 
-    if (rows.length === 0) {
-      return res.json([]); // Return an empty array if no videos found
-    }
-
     const videos = rows.map(
       (row) =>
         new VideoTutorial(
@@ -46,6 +43,7 @@ const getAllVideoTutorials = async (req, res) => {
           row.description,
           row.videoUrl,
           row.categoryVideoId,
+          row.thumbnailUrl,
           row.created_at,
           row.updated_at
         )
@@ -74,9 +72,7 @@ const getVideoTutorialById = async (req, res) => {
     const [rows] = await dbpool.execute(SQLQuery, [id]);
 
     if (rows.length === 0) {
-      return res.status(404).json({
-        message: "Video tutorial not found.",
-      });
+      return res.status(404).json({ message: "Video tutorial not found." });
     }
 
     const video = new VideoTutorial(
@@ -85,6 +81,7 @@ const getVideoTutorialById = async (req, res) => {
       rows[0].description,
       rows[0].videoUrl,
       rows[0].categoryVideoId,
+      rows[0].thumbnailUrl,
       rows[0].created_at,
       rows[0].updated_at
     );
@@ -98,28 +95,35 @@ const getVideoTutorialById = async (req, res) => {
   }
 };
 
+
 // Create a new video tutorial
 const createNewVideoTutorial = async (req, res) => {
   console.log("Request Body:", req.body);
-  console.log("Uploaded File:", req.file);
-  const { title, description, categoryVideoId } = req.body;
-  const videoUrl = req.file ? `/uploads/${req.file.filename}` : null;
+  console.log("Uploaded Files:", req.files); // Log untuk debugging
 
-  if (!title || !description || !videoUrl) {
+  const { title, description, categoryVideoId } = req.body;
+
+  // Ambil URL file dari hasil upload
+  const videoUrl = req.files.videoUrl ? `/uploads/${req.files.videoUrl[0].filename}` : null;
+  const thumbnailUrl = req.files.thumbnailUrl ? `/uploads/${req.files.thumbnailUrl[0].filename}` : null;
+
+  // Validasi
+  if (!title || !description || !videoUrl || !thumbnailUrl) {
     return res.status(400).json({
-      message: "Title, description, and videoUrl are required fields.",
+      message: "Title, description, videoUrl, and thumbnailUrl are required fields.",
     });
   }
 
   try {
     const SQLQuery = `
-      INSERT INTO videoTutorial (title, description, videoUrl, categoryVideoId, created_at, updated_at)
-      VALUES (?, ?, ?, ?, NOW(), NOW())
+      INSERT INTO videoTutorial (title, description, videoUrl, thumbnailUrl, categoryVideoId, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, NOW(), NOW())
     `;
     const [result] = await dbpool.execute(SQLQuery, [
       title,
       description,
       videoUrl,
+      thumbnailUrl,
       categoryVideoId || null,
     ]);
 
@@ -129,6 +133,7 @@ const createNewVideoTutorial = async (req, res) => {
       description,
       videoUrl,
       categoryVideoId,
+      thumbnailUrl,
       new Date(),
       new Date()
     );
@@ -145,9 +150,10 @@ const createNewVideoTutorial = async (req, res) => {
   }
 };
 
+
 // Export controller functions
 module.exports = {
   getAllVideoTutorials,
-  getVideoTutorialById, // Export the new function
+  getVideoTutorialById,
   createNewVideoTutorial,
 };
