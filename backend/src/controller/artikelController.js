@@ -1,5 +1,6 @@
 const dbpool = require("../config/database");
 const Artikel = require("../models/artikelModel.js");
+const path = require("path");
 
 // Membuat tabel artikel jika belum ada
 const ensureArtikelTableExists = async () => {
@@ -33,7 +34,10 @@ const getAllArtikel = async (req, res) => {
     const [rows] = await dbpool.execute(SQLQuery);
 
     const artikels = rows.map(
-      (row) => new Artikel(row.id, row.judul, row.deskripsi, row.imageUrl, row.categoryArtikelId, row.created_at, row.updated_at)
+      (row) => new Artikel(
+        row.id, row.judul, row.deskripsi, row.imageUrl, 
+        row.categoryArtikelId, row.created_at, row.updated_at
+      )
     );
 
     res.json(artikels);
@@ -45,84 +49,51 @@ const getAllArtikel = async (req, res) => {
   }
 };
 
-// Membuat artikel baru
+// Membuat artikel baru dengan upload image
 const createNewArtikel = async (req, res) => {
-    try {
-      const { judul, deskripsi, imageUrl = null, categoryArtikelId = null } = req.body;
-  
-      // Validasi input: Pastikan judul dan deskripsi tidak undefined atau kosong
-      if (!judul) {
-        return res.status(400).json({ 
-          message: "CREATE NEW ARTIKEL FAILED", 
-          error: "Field 'judul' is required and cannot be empty." 
-        });
-      }
-  
-      if (!deskripsi) {
-        return res.status(400).json({ 
-          message: "CREATE NEW ARTIKEL FAILED", 
-          error: "Field 'deskripsi' is required and cannot be empty." 
-        });
-      }
-  
-      // Pastikan categoryArtikelId berupa angka atau null
-      if (categoryArtikelId !== null && isNaN(categoryArtikelId)) {
-        return res.status(400).json({
-          message: "CREATE NEW ARTIKEL FAILED",
-          error: "'categoryArtikelId' must be a valid number or null.",
-        });
-      }
-  
-      await ensureArtikelTableExists();
-  
-      const SQLQuery = `
-        INSERT INTO artikel (judul, deskripsi, imageUrl, categoryArtikelId, created_at, updated_at)
-        VALUES (?, ?, ?, ?, NOW(), NOW())
-      `;
-  
-      const [result] = await dbpool.execute(SQLQuery, [
-        judul,
-        deskripsi,
-        imageUrl,
-        categoryArtikelId,
-      ]);
-  
-      const newArtikel = new Artikel(
-        result.insertId,
-        judul,
-        deskripsi,
-        imageUrl,
-        categoryArtikelId,
-        new Date(),
-        new Date()
-      );
-  
-      res.json({
-        message: "CREATE NEW ARTIKEL SUCCESS",
-        artikel: newArtikel,
-      });
-  
-    } catch (error) {
-      let errorMessage = "An unexpected error occurred.";
-  
-      if (error.message.includes("Bind parameters must not contain undefined")) {
-        errorMessage =
-          "CREATE NEW ARTIKEL FAILED: One or more parameters are undefined. Make sure all required fields are provided.";
-      }
-  
-      res.status(500).json({
-        message: "CREATE NEW ARTIKEL FAILED",
-        ServerMessage: errorMessage,
-        errorDetails: error.message, // Debugging details
-      });
-    }
-  };
-  
+  const { judul, deskripsi, categoryArtikelId = null } = req.body;
+  const imageUrl = req.file ? `/uploads/images/${req.file.filename}` : null;
+
+  // Validasi input
+  if (!judul || !deskripsi) {
+    return res.status(400).json({ 
+      message: "CREATE NEW ARTIKEL FAILED", 
+      error: "Field 'judul' and 'deskripsi' are required." 
+    });
+  }
+
+  try {
+    await ensureArtikelTableExists();
+    const SQLQuery = `
+      INSERT INTO artikel (judul, deskripsi, imageUrl, categoryArtikelId, created_at, updated_at)
+      VALUES (?, ?, ?, ?, NOW(), NOW())
+    `;
+    const [result] = await dbpool.execute(SQLQuery, [
+      judul, deskripsi, imageUrl, categoryArtikelId,
+    ]);
+
+    const newArtikel = new Artikel(
+      result.insertId, judul, deskripsi, imageUrl, categoryArtikelId, new Date(), new Date()
+    );
+
+    res.json({
+      message: "CREATE NEW ARTIKEL SUCCESS",
+      artikel: newArtikel,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "CREATE NEW ARTIKEL FAILED",
+      ServerMessage: error.message,
+    });
+  }
+};
 
 // Memperbarui artikel
 const updateArtikel = async (req, res) => {
   const { id } = req.params;
-  const { judul, deskripsi, imageUrl, categoryArtikelId } = req.body;
+  const { judul, deskripsi, categoryArtikelId } = req.body;
+  const imageUrl = req.file ? `/uploads/images/${req.file.filename}` : null; // Mendapatkan URL gambar baru
+
   try {
     await ensureArtikelTableExists();
 

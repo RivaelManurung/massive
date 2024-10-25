@@ -103,11 +103,13 @@ const createNewVideoTutorial = async (req, res) => {
 
   const { title, description, categoryVideoId } = req.body;
 
-  // Ambil URL file dari hasil upload
-  const videoUrl = req.files.videoUrl ? `/uploads/${req.files.videoUrl[0].filename}` : null;
-  const thumbnailUrl = req.files.thumbnailUrl ? `/uploads/${req.files.thumbnailUrl[0].filename}` : null;
+  const videoUrl = req.files.videoUrl
+    ? `/uploads/videos/${req.files.videoUrl[0].filename}`
+    : null;
+  const thumbnailUrl = req.files.thumbnailUrl
+    ? `/uploads/thumbnails/${req.files.thumbnailUrl[0].filename}`
+    : null;
 
-  // Validasi
   if (!title || !description || !videoUrl || !thumbnailUrl) {
     return res.status(400).json({
       message: "Title, description, videoUrl, and thumbnailUrl are required fields.",
@@ -149,6 +151,7 @@ const createNewVideoTutorial = async (req, res) => {
     });
   }
 };
+
 
 
 // Export controller functions

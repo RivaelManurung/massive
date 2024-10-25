@@ -44,7 +44,8 @@ router.post(
   "/artikel",
   authenticateJWT,
   adminMiddleware,
-  artikelController.createNewArtikel
+  upload.single("imageUrl"), // Middleware upload untuk gambar artikel
+  artikelController.createNewArtikel // Panggil controller setelah upload
 );
 router.put(
   "/artikel/:id",

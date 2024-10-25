@@ -2,22 +2,36 @@ const express = require("express");
 require("dotenv").config();
 const dbpool = require("./src/config/database.js");
 const userRoutes = require("./src/routes/route.js"); // Import routes
-const PORT = process.env.PORT;
-const app = express();
 const cors = require("cors");
-const path = require("path"); // Import path module
+const path = require("path");
 
-app.use(cors()); // Allow all domains; adjust CORS configuration as needed
+const PORT = process.env.PORT || 3000; // Default ke port 3000 jika PORT tidak diset
+const app = express();
 
+// Middleware CORS untuk mengizinkan semua domain (atur sesuai kebutuhan)
+app.use(cors());
+
+// Middleware untuk parsing request body JSON
 app.use(express.json());
 
-// Serve static files from the uploads directory
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// Middleware untuk serve static files dari folder uploads
+app.use(
+  "/uploads/thumbnails",
+  express.static(path.join(__dirname, "uploads/thumbnails"))
+);
+app.use(
+  "/uploads/videos",
+  express.static(path.join(__dirname, "uploads/videos"))
+);
+app.use(
+  "/uploads/images", // Static folder untuk gambar artikel
+  express.static(path.join(__dirname, "uploads/images"))
+);
 
-// Use the imported routes
-app.use("/", userRoutes); // Ensure the path is as desired
+// Gunakan routes yang sudah diimport
+app.use("/", userRoutes);
 
-// Start the server
+// Start server
 app.listen(PORT, () => {
-  console.log(`Example app listening on PORT ${PORT}!`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
