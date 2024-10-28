@@ -8,7 +8,7 @@ const Videos = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null); // Use ID instead of name
   const itemsPerPage = 6;
   const navigate = useNavigate();
 
@@ -41,10 +41,10 @@ const Videos = () => {
     fetchVideosAndCategories();
   }, []);
 
-  // Filter videos based on selected category
-  const filteredVideos = videos.filter(video => {
-    return selectedCategory === "All" || video.category === selectedCategory; // Ensure this matches the property in your video data
-  });
+  // Filter videos based on selected category ID
+  const filteredVideos = videos.filter((video) =>
+    selectedCategoryId === null || video.categoryId === selectedCategoryId
+  );
 
   // Pagination logic
   const totalPages = Math.ceil(filteredVideos.length / itemsPerPage);
@@ -53,13 +53,18 @@ const Videos = () => {
 
   // Function to handle video card click
   const handleVideoClick = (videoId) => {
-    navigate(`/video/${videoId}`); // Navigate to the detailed video page
+    navigate(`/video/${videoId}`);
   };
 
   // Handle category change
-  const handleCategoryChange = (category) => {
-    setSelectedCategory(category);
-    setCurrentPage(1); // Reset to first page when category changes
+  const handleCategoryChange = (categoryId) => {
+    setSelectedCategoryId(categoryId);
+    setCurrentPage(1);
+  };
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
   if (loading) {
@@ -86,16 +91,16 @@ const Videos = () => {
         <h2 className="text-3xl font-bold mb-6">Filter by Category</h2>
         <div className="flex space-x-4">
           <button
-            className={`btn ${selectedCategory === "All" ? "bg-black text-white" : "bg-white text-black"} border border-black`}
-            onClick={() => handleCategoryChange("All")}
+            className={`btn ${selectedCategoryId === null ? "bg-black text-white" : "bg-white text-black"} border border-black`}
+            onClick={() => handleCategoryChange(null)}
           >
             All
           </button>
           {categories.map((category) => (
             <button
               key={category.id}
-              className={`btn ${selectedCategory === category.name ? "bg-black text-white" : "bg-white text-black"} border border-black`}
-              onClick={() => handleCategoryChange(category.name)}
+              className={`btn ${selectedCategoryId === category.id ? "bg-black text-white" : "bg-white text-black"} border border-black`}
+              onClick={() => handleCategoryChange(category.id)}
             >
               {category.name}
             </button>
@@ -113,9 +118,9 @@ const Videos = () => {
       {/* Pagination Controls */}
       {totalPages > 1 && (
         <div className="mt-8 flex justify-center space-x-4">
-          <button 
+          <button
             className={`btn ${currentPage === 1 ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-black text-white"}`}
-            onClick={() => handlePageChange(currentPage - 1)} 
+            onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
           >
             Previous
@@ -131,9 +136,9 @@ const Videos = () => {
             </button>
           ))}
 
-          <button 
+          <button
             className={`btn ${currentPage === totalPages ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-black text-white"}`}
-            onClick={() => handlePageChange(currentPage + 1)} 
+            onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
             Next
@@ -147,7 +152,7 @@ const Videos = () => {
 const VideoCard = ({ video, onClick }) => (
   <div
     className="card card-bordered shadow-md transition-transform transform hover:scale-105 cursor-pointer"
-    onClick={() => onClick(video.id)} // This should now work since handleVideoClick is defined
+    onClick={() => onClick(video.id)}
   >
     <figure>
       <img
@@ -158,7 +163,7 @@ const VideoCard = ({ video, onClick }) => (
     </figure>
     <div className="card-body">
       <h3 className="text-xl font-semibold mt-2">{video.title}</h3>
-      <p className="text-sm text-gray-500">{video.category}</p> {/* Display video category */}
+      <p className="text-sm text-gray-500">{video.categoryId}</p> {/* Display categoryId for now */}
     </div>
   </div>
 );
