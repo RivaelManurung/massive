@@ -102,14 +102,13 @@ const createNewUser = async (req, res) => {
 };
 
 // Login user
+// Login user
 const loginUser = async (req, res) => {
-  const { name, password } = req.body;
+  const { email, password } = req.body;
   try {
     await ensureUsersTableExists();
+    const [rows] = await dbpool.execute("SELECT * FROM users WHERE email = ?", [email]);
 
-    const [rows] = await dbpool.execute("SELECT * FROM users WHERE name = ?", [
-      name,
-    ]);
     if (rows.length === 0) {
       return res.status(400).json({ message: "User not found" });
     }
@@ -128,12 +127,15 @@ const loginUser = async (req, res) => {
 
     res.json({ message: "Login success", token });
   } catch (error) {
+    console.error("Error during login:", error); // Log error untuk debugging
     res.status(500).json({
       message: "Login failed",
-      ServerMessage: error,
+      ServerMessage: error.message || error,
     });
   }
 };
+
+
 
 // Logout user
 const logoutUser = (req, res) => {

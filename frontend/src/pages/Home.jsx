@@ -1,84 +1,144 @@
 import React from 'react';
-import { FaUsers } from 'react-icons/fa';
+import { FaUsers, FaLeaf, FaSeedling, FaBookReader, FaArrowRight, FaCheck, FaQuoteLeft } from 'react-icons/fa';
 import farmImage from '../assets/images-1.jpg';
-import riceImage from '../assets/images-1.jpg';
 
 const Home = () => {
   return (
-    <>
-      <div className="bg-white min-h-screen">
-        {/* Hero Section */}
-        <div className="hero bg-green-100 py-20 px-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="h-[400px] lg:h-auto">
-              <img
-                src={farmImage}
-                className="w-full h-full object-cover rounded-lg shadow-2xl"
-                alt="Terasering Sawah"
-              />
+    <div className="min-h-screen bg-base-100">
+      {/* Hero Section */}
+      <div className="hero min-h-screen bg-gradient-to-b from-green-100 to-base-100">
+        <div className="hero-content flex-col lg:flex-row-reverse gap-8">
+          <div className="lg:w-1/2">
+            <img 
+              src={farmImage} 
+              className="rounded-lg shadow-2xl w-full h-[400px] object-cover hover:scale-105 transition duration-300"
+              alt="Agriculture"
+            />
+          </div>
+          <div className="lg:w-1/2">
+            <div className="badge badge-success gap-2 mb-4">
+              <FaLeaf /> Platform Pembelajaran Pertanian
             </div>
-            <div className="flex flex-col justify-center lg:ml-10">
-              <h1 className="text-5xl font-bold text-green-900">
-                Selamat Datang di AgriLearn!
-              </h1>
-              <p className="py-6">
-                Temukan masa depan pertanian dengan alat dan pengetahuan inovatif yang
-                membangkitkan generasi petani berkembang. Mari kita ciptakan masa depan
-                yang berkelanjutan bersama!
-              </p>
+            <h1 className="text-5xl text-white font-bold leading-tight">
+              Belajar Pertanian <span className="text-green-600">Untuk Masa Depan</span>
+            </h1>
+            <p className="py-6 text-white text-base-content/70 text-lg">
+              Platform pembelajaran digital yang membantu petani meningkatkan produktivitas dan keberlanjutan pertanian melalui teknologi modern dan praktik terbaik.
+            </p>
+            <div className="flex gap-4 flex-wrap">
+              <button className="btn btn-green-600 btn-lg">
+                Mulai Belajar <FaArrowRight className="ml-2" />
+              </button>
+              <button className="btn btn-outline btn-green-600 btn-lg">
+                Pelajari Lebih Lanjut
+              </button>
+            </div>
+
+            {/* Stats */}
+            <div className="stats shadow mt-8">
+              <div className="stat">
+                <div className="stat-title">Pengguna Aktif</div>
+                <div className="stat-value text-green-600">31K</div>
+                <div className="stat-desc">↗︎ 400 (22%)</div>
+              </div>
+              
+              <div className="stat">
+                <div className="stat-title">Kursus</div>
+                <div className="stat-value text-green-600">4,200</div>
+                <div className="stat-desc">↗︎ 90 (14%)</div>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Mengapa Memilih AgriLearn */}
-        <section className="py-10 max-w-screen-lg mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-10">
-            Mengapa memilih AgriLearn
-          </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="space-y-5">
-              <div className="card bg-green-700 p-6 rounded-lg">
-                <h3 className="text-xl text-white font-bold">Panduan Langsung</h3>
-                <p className="mt-2 text-white">
-                  Menawarkan panduan langsung dan tips praktis untuk petani
-                  pemula hingga profesional.
-                </p>
-                <button className="btn text-white font-bold btn-link mt-4">
-                  Baca Selengkapnya
-                </button>
-              </div>
-              <div className="card bg-green-700 p-6 rounded-lg">
-                <h3 className="text-xl text-white font-bold">User Friendly</h3>
-                <p className="mt-2 text-white">
-                  Platform yang user-friendly, memudahkan pengguna dari berbagai
-                  latar belakang untuk belajar kapan saja.
-                </p>
-                <button className="btn text-white font-bold btn-link mt-4">
-                  Baca Selengkapnya
-                </button>
-              </div>
-              <div className="card bg-green-700 p-6 rounded-lg">
-                <h3 className="text-xl text-white font-bold">Forum Diskusi</h3>
-                <p className="mt-2 text-white">
-                  AgriLearn memiliki forum untuk berbagi pengetahuan dan
-                  pengalaman di kalangan petani.
-                </p>
-                <button className="btn text-white font-bold btn-link mt-4">
-                  Baca Selengkapnya
-                </button>
+      {/* Features Section */}
+      <div className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-2xl font-bold text-green-600 mb-2">Fitur Unggulan</h2>
+            <p className="text-4xl font-bold">Cara Lebih Baik untuk Belajar Pertanian</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all">
+              <div className="card-body">
+                <div className="w-16 h-16 mask mask-squircle bg-green-600 flex items-center justify-center mb-4">
+                  <FaBookReader className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="card-title">Materi Terstruktur</h3>
+                <p>Kurikulum yang dirancang khusus untuk pemula hingga ahli</p>
+                <div className="card-actions justify-end">
+                  <button className="btn btn-green-600 btn-sm">Selengkapnya</button>
+                </div>
               </div>
             </div>
-            <div className="h-[300px] lg:h-auto">
-              <img
-                src={riceImage}
-                className="w-full h-full object-cover rounded-lg shadow-lg"
-                alt="Padi"
-              />
+
+            <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all">
+              <div className="card-body">
+                <div className="w-16 h-16 mask mask-squircle bg-green-600 flex items-center justify-center mb-4">
+                  <FaUsers className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="card-title">Komunitas Aktif</h3>
+                <p>Forum diskusi untuk berbagi pengalaman dan pengetahuan</p>
+                <div className="card-actions justify-end">
+                  <button className="btn btn-green-600 btn-sm">Selengkapnya</button>
+                </div>
+              </div>
+            </div>
+
+            <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all">
+              <div className="card-body">
+                <div className="w-16 h-16 mask mask-squircle bg-green-600 flex items-center justify-center mb-4">
+                  <FaSeedling className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="card-title">Praktik Langsung</h3>
+                <p>Panduan step-by-step untuk implementasi di lapangan</p>
+                <div className="card-actions justify-end">
+                  <button className="btn btn-green-600 btn-sm">Selengkapnya</button>
+                </div>
+              </div>
             </div>
           </div>
-        </section>
+        </div>
       </div>
-    </>
+
+      {/* Testimonials Section */}
+      <div className="py-20 bg-base-200">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-2xl font-bold text-green-600 mb-2">Apa Kata Petani?</h2>
+            <p className="text-4xl font-bold">Cerita dan Inspirasi</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="card bg-base-100 shadow-xl">
+              <div className="card-body">
+                <FaQuoteLeft className="text-green-600 text-2xl mb-4" />
+                <p>"Dengan platform ini, saya belajar teknik baru yang meningkatkan hasil panen saya."</p>
+                <div className="mt-4 text-right">— Budi, Petani Padi</div>
+              </div>
+            </div>
+
+            <div className="card bg-base-100 shadow-xl">
+              <div className="card-body">
+                <FaQuoteLeft className="text-green-600 text-2xl mb-4" />
+                <p>"Komunitasnya sangat membantu, banyak ilmu dan pengalaman yang dibagikan."</p>
+                <div className="mt-4 text-right">— Siti, Petani Sayur</div>
+              </div>
+            </div>
+
+            <div className="card bg-base-100 shadow-xl">
+              <div className="card-body">
+                <FaQuoteLeft className="text-green-600 text-2xl mb-4" />
+                <p>"Panduan praktiknya sangat jelas dan mudah diterapkan di lapangan."</p>
+                <div className="mt-4 text-right">— Andi, Petani Buah</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

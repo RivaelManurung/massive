@@ -82,9 +82,9 @@ const Videos = () => {
   return (
     <div className="p-8 max-w-screen-lg mx-auto">
       <h2 className="text-5xl font-extrabold mb-4 text-center">Video Tutorials</h2>
-      <p className="text-lg text-gray-600 text-center mb-12">
+      {/* <p className="text-lg text-gray-600 text-center mb-12">
         Explore our collection of video tutorials designed to enhance your skills.
-      </p>
+      </p> */}
 
       {/* Category Filter Section */}
       <div className="mb-8">
