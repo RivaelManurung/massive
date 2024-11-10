@@ -11,7 +11,7 @@ const ensureFolderExists = (folderPath) => {
 };
 
 // Path untuk folder uploads
-const uploadsPath = path.join(__dirname, "../uploads");
+const uploadsPath = path.join(__dirname, "../../uploads");
 const thumbnailsPath = path.join(uploadsPath, "thumbnails");
 const videosPath = path.join(uploadsPath, "videos");
 const imagesPath = path.join(uploadsPath, "images");

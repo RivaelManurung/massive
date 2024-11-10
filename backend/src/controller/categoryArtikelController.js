@@ -28,14 +28,14 @@ const getAllCategoryArtikel = async (req, res) => {
     const [rows] = await dbpool.execute(SQLQuery);
 
     const categoryArtikels = rows.map(
-      (row) => new CategoryArtikel(row.id, row.name, row.description, row.created_at, row.updated_at)
+      (row) => new CategoryArtikel(row.id, row.name, row.created_at, row.updated_at)
     );
 
     res.json(categoryArtikels);
   } catch (error) {
     res.status(500).json({
       message: "Failed to retrieve category artikels",
-      ServerMessage: error,
+      ServerMessage: error.message,
     });
   }
 };
@@ -47,8 +47,8 @@ const createNewCategoryArtikel = async (req, res) => {
     await ensureCategoryArtikelTableExists();
 
     const SQLQuery = `
-      INSERT INTO categoryArtikel (name, created_at, updated_at)
-      VALUES (?, NOW(), NOW())
+      INSERT INTO categoryArtikel (name)
+      VALUES (?)
     `;
     const [result] = await dbpool.execute(SQLQuery, [name]);
 
@@ -60,7 +60,7 @@ const createNewCategoryArtikel = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "CREATE NEW CATEGORY ARTIKEL FAILED",
-      ServerMessage: error,
+      ServerMessage: error.message,
     });
   }
 };
@@ -74,12 +74,12 @@ const updateCategoryArtikel = async (req, res) => {
 
     const SQLQuery = `
       UPDATE categoryArtikel
-      SET name = ? , updated_at = NOW()
+      SET name = ?, updated_at = NOW()
       WHERE id = ?
     `;
     await dbpool.execute(SQLQuery, [name, id]);
 
-    const updatedCategoryArtikel = new CategoryArtikel(id, name, null, new Date());
+    const updatedCategoryArtikel = new CategoryArtikel(id, name, new Date());
     res.json({
       message: "UPDATE CATEGORY ARTIKEL SUCCESS",
       categoryArtikel: updatedCategoryArtikel,
@@ -87,7 +87,7 @@ const updateCategoryArtikel = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "UPDATE CATEGORY ARTIKEL FAILED",
-      ServerMessage: error,
+      ServerMessage: error.message,
     });
   }
 };
@@ -108,15 +108,44 @@ const deleteCategoryArtikel = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "DELETE CATEGORY ARTIKEL FAILED",
-      ServerMessage: error,
+      ServerMessage: error.message,
     });
   }
 };
 
+const getCategoryArtikelById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await ensureCategoryArtikelTableExists();
+    const SQLQuery = "SELECT * FROM categoryArtikel WHERE id = ?";
+    const [rows] = await dbpool.execute(SQLQuery, [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        message: "Category Artikel not found",
+      });
+    }
+
+    const categoryArtikel = new CategoryArtikel(
+      rows[0].id,
+      rows[0].name,
+      rows[0].created_at,
+      rows[0].updated_at
+    );
+
+    res.json(categoryArtikel);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to retrieve category artikel by ID",
+      ServerMessage: error.message,
+    });
+  }
+};
 module.exports = {
   getAllCategoryArtikel,
   createNewCategoryArtikel,
   updateCategoryArtikel,
   deleteCategoryArtikel,
-  ensureCategoryArtikelTableExists
+  getCategoryArtikelById,
+  ensureCategoryArtikelTableExists,
 };

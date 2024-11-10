@@ -2,7 +2,7 @@ const dbpool = require("../config/database");
 const Artikel = require("../models/artikelModel.js");
 const path = require("path");
 
-// Membuat tabel artikel jika belum ada
+// Create the artikel table if it doesn't already exist
 const ensureArtikelTableExists = async () => {
   const createTableQuery = `
     CREATE TABLE IF NOT EXISTS artikel (
@@ -26,39 +26,75 @@ const ensureArtikelTableExists = async () => {
 
 ensureArtikelTableExists();
 
-// Mendapatkan semua artikel
+// Get all articles
+
 const getAllArtikel = async (req, res) => {
   try {
     await ensureArtikelTableExists();
     const SQLQuery = "SELECT * FROM artikel";
     const [rows] = await dbpool.execute(SQLQuery);
 
-    const artikels = rows.map(
-      (row) => new Artikel(
-        row.id, row.judul, row.deskripsi, row.imageUrl, 
-        row.categoryArtikelId, row.created_at, row.updated_at
-      )
-    );
+    const artikels = rows.map((row) => ({
+      id: row.id,
+      title: row.judul,  // Send as 'title' for consistency
+      description: row.deskripsi,
+      imageUrl: row.imageUrl,
+      categoryArtikelId: row.categoryArtikelId,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    }));
 
     res.json(artikels);
   } catch (error) {
     res.status(500).json({
-      message: "Failed to retrieve artikels",
+      message: "Failed to retrieve articles",
       ServerMessage: error,
     });
   }
 };
 
-// Membuat artikel baru dengan upload image
+// Get article by ID
+const getArtikelById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await ensureArtikelTableExists();
+    const SQLQuery = "SELECT * FROM artikel WHERE id = ?";
+    const [rows] = await dbpool.execute(SQLQuery, [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Article not found" });
+    }
+
+    const artikel = {
+      id: rows[0].id,
+      title: rows[0].judul,  // Send as 'title' for consistency
+      description: rows[0].deskripsi,
+      imageUrl: rows[0].imageUrl,
+      categoryArtikelId: rows[0].categoryArtikelId,
+      createdAt: rows[0].created_at,
+      updatedAt: rows[0].updated_at,
+    };
+
+    res.json(artikel);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to retrieve article",
+      ServerMessage: error,
+    });
+  }
+};
+
+
+// Create a new article with image upload
 const createNewArtikel = async (req, res) => {
   const { judul, deskripsi, categoryArtikelId = null } = req.body;
   const imageUrl = req.file ? `/uploads/images/${req.file.filename}` : null;
 
-  // Validasi input
+  // Validate input
   if (!judul || !deskripsi) {
-    return res.status(400).json({ 
-      message: "CREATE NEW ARTIKEL FAILED", 
-      error: "Field 'judul' and 'deskripsi' are required." 
+    return res.status(400).json({
+      message: "CREATE NEW ARTIKEL FAILED",
+      error: "Field 'judul' and 'deskripsi' are required.",
     });
   }
 
@@ -69,11 +105,20 @@ const createNewArtikel = async (req, res) => {
       VALUES (?, ?, ?, ?, NOW(), NOW())
     `;
     const [result] = await dbpool.execute(SQLQuery, [
-      judul, deskripsi, imageUrl, categoryArtikelId,
+      judul,
+      deskripsi,
+      imageUrl,
+      categoryArtikelId,
     ]);
 
     const newArtikel = new Artikel(
-      result.insertId, judul, deskripsi, imageUrl, categoryArtikelId, new Date(), new Date()
+      result.insertId,
+      judul,
+      deskripsi,
+      imageUrl,
+      categoryArtikelId,
+      new Date(),
+      new Date()
     );
 
     res.json({
@@ -88,26 +133,58 @@ const createNewArtikel = async (req, res) => {
   }
 };
 
-// Memperbarui artikel
+// Update article by ID
+// Update article by ID
 const updateArtikel = async (req, res) => {
   const { id } = req.params;
   const { judul, deskripsi, categoryArtikelId } = req.body;
-  const imageUrl = req.file ? `/uploads/images/${req.file.filename}` : null; // Mendapatkan URL gambar baru
+  const imageUrl = req.file ? `/uploads/images/${req.file.filename}` : null;
+
+  // Prepare the values to update
+  const updatedFields = {};
+  if (judul !== undefined) updatedFields.judul = judul;
+  if (deskripsi !== undefined) updatedFields.deskripsi = deskripsi;
+  if (categoryArtikelId !== undefined) updatedFields.categoryArtikelId = categoryArtikelId;
+  if (imageUrl !== null) updatedFields.imageUrl = imageUrl;
+
+  // If no fields were provided to update, return an error
+  if (Object.keys(updatedFields).length === 0) {
+    return res.status(400).json({
+      message: "UPDATE ARTIKEL FAILED",
+      error: "At least one field must be provided to update.",
+    });
+  }
+
+  // Build the SET part of the SQL query dynamically
+  const setClause = Object.keys(updatedFields)
+    .map((key) => `${key} = ?`)
+    .join(", ");
+
+  // Values for the SQL query (in the same order as the keys in updatedFields)
+  const values = Object.values(updatedFields);
+  values.push(id); // Add the article ID for the WHERE clause
 
   try {
     await ensureArtikelTableExists();
 
+    // Dynamic SQL query for updating the article
     const SQLQuery = `
       UPDATE artikel
-      SET judul = ?, deskripsi = ?, imageUrl = ?, categoryArtikelId = ?, updated_at = NOW()
+      SET ${setClause}, updated_at = NOW()
       WHERE id = ?
     `;
-    await dbpool.execute(SQLQuery, [judul, deskripsi, imageUrl, categoryArtikelId, id]);
+    
+    // Execute the query with the dynamic values
+    await dbpool.execute(SQLQuery, values);
 
-    const updatedArtikel = new Artikel(id, judul, deskripsi, imageUrl, categoryArtikelId, null, new Date());
+    // Return success response
     res.json({
       message: "UPDATE ARTIKEL SUCCESS",
-      artikel: updatedArtikel,
+      artikel: {
+        id,
+        ...updatedFields,
+        updatedAt: new Date(),
+      },
     });
   } catch (error) {
     res.status(500).json({
@@ -117,7 +194,10 @@ const updateArtikel = async (req, res) => {
   }
 };
 
-// Menghapus artikel
+
+
+
+// Delete article by ID
 const deleteArtikel = async (req, res) => {
   const { id } = req.params;
   try {
@@ -138,9 +218,10 @@ const deleteArtikel = async (req, res) => {
   }
 };
 
-// Ekspor controller
+// Export controller
 module.exports = {
   getAllArtikel,
+  getArtikelById, // Export the new function
   createNewArtikel,
   updateArtikel,
   deleteArtikel,

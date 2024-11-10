@@ -19,6 +19,7 @@ router.get("/getAllUser", authenticateJWT, userController.getAllUsers);
 
 // --- CATEGORY ARTIKEL ROUTES ---
 router.get("/categoryArtikel", categoryArtikelController.getAllCategoryArtikel);
+router.get("/categoryArtikel/:id", categoryArtikelController.getCategoryArtikelById); // Route to get category by ID
 router.post(
   "/categoryArtikel",
   authenticateJWT,
@@ -38,14 +39,16 @@ router.delete(
   categoryArtikelController.deleteCategoryArtikel
 );
 
+
 // --- ARTIKEL ROUTES ---
 router.get("/artikel", artikelController.getAllArtikel);
+router.get("/artikel/:id", artikelController.getArtikelById); // New route to get article by ID
 router.post(
   "/artikel",
   authenticateJWT,
   adminMiddleware,
-  upload.single("imageUrl"), // Middleware upload untuk gambar artikel
-  artikelController.createNewArtikel // Panggil controller setelah upload
+  upload.single("imageUrl"),
+  artikelController.createNewArtikel
 );
 router.put(
   "/artikel/:id",
@@ -62,7 +65,7 @@ router.delete(
 
 // --- CATEGORY VIDEO ROUTES ---
 router.get("/categoryVideo", categoryVideoController.getAllCategoryVideo);
-router.get("/categoryVideo/:id", categoryVideoController.getCategoryVideoById); // New route for getting category video by ID
+router.get("/categoryVideo/:id", categoryVideoController.getCategoryVideoById);
 router.post(
   "/categoryVideo",
   authenticateJWT,
@@ -84,12 +87,12 @@ router.delete(
 
 // --- VIDEO TUTORIAL ROUTES ---
 router.get("/videoTutorial", videoTutorialController.getAllVideoTutorials);
-router.get("/videoTutorial/:id", videoTutorialController.getVideoTutorialById); // New route for getting video by ID
+router.get("/videoTutorial/:id", videoTutorialController.getVideoTutorialById);
 router.post(
   "/videoTutorial",
   authenticateJWT,
   adminMiddleware,
-  upload.fields([{ name: "videoUrl" }, { name: "thumbnailUrl" }]), // Multiple fields
+  upload.fields([{ name: "videoUrl" }, { name: "thumbnailUrl" }]),
   (req, res) => {
     if (req.fileValidationError) {
       return res.status(400).json({ message: req.fileValidationError });

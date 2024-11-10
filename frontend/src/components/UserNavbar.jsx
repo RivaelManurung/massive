@@ -1,22 +1,64 @@
-// UserNavbar.jsx
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { FaBars, FaTimes, FaHome, FaBook, FaVideo, FaComments, FaUserCircle } from "react-icons/fa";
 
-const UserNavbar = ({ isLoggedIn, isAdmin }) => {
+// Notification
+const LoginModal = ({ onClose }) => {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-semibold text-gray-800">Login Diperlukan</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <FaTimes size={20} />
+          </button>
+        </div>
+        <p className="text-gray-600 mt-2 mb-4">Anda perlu login untuk mengakses Forum.</p>
+        <div className="flex justify-center gap-4">
+          <button onClick={onClose} className="btn btn-secondary border-gray-400 text-gray-700 hover:bg-gray-100">
+            Tutup
+          </button>
+          <Link to="/login" className="btn btn-primary text-white bg-lime-600 hover:bg-lime-700">
+            Ke Login
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const UserNavbar = ({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+
   const toggleMenu = () => setIsOpen(!isOpen);
   const toggleProfileMenu = () => setIsProfileOpen(!isProfileOpen);
 
   const isActive = (path) => (location.pathname === path ? 'bg-lime-600 font-bold' : 'hover:bg-lime-600');
 
+  const handleSignOut = () => {
+    setIsLoggedIn(false);
+    setIsAdmin(false);
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
+  const handleForumClick = () => {
+    if (!isLoggedIn) {
+      setIsModalOpen(true);
+    } else {
+      navigate("/forum");
+    }
+  };
+
   return (
-    <nav className="navbar bg-transparent text-white shadow-lg px-6">
+    <nav style={{ backgroundColor: '#055941' }} className="navbar text-white shadow-lg px-6">
       <div className="flex-1">
-        <Link to="/" className="btn text-lime-400 btn-ghost normal-case text-2xl font-bold">
-          AgriLearn
+        <Link to="/" className="btn btn-ghost normal-case text-2xl font-bold">
+          <img src="/src/assets/logo.png" alt="AgriLearn Logo" className="h-16 w-auto -mt-2" />
         </Link>
       </div>
 
@@ -29,22 +71,21 @@ const UserNavbar = ({ isLoggedIn, isAdmin }) => {
           </li>
           <li>
             <Link to="/article" className={`flex items-center ${isActive("/article")}`}>
-              <FaBook className="mr-2" /> Article
+              <FaBook className="mr-2" /> Artikel
             </Link>
           </li>
           <li>
             <Link to="/videos" className={`flex items-center ${isActive("/videos")}`}>
-              <FaVideo className="mr-2" /> Videos
+              <FaVideo className="mr-2" /> Video
             </Link>
           </li>
           <li>
-            <Link to="/forum" className={`flex items-center ${isActive("/forum")}`}>
+            <button onClick={handleForumClick} className={`flex items-center ${isActive("/forum")}`}>
               <FaComments className="mr-2" /> Forum
-            </Link>
+            </button>
           </li>
         </ul>
 
-        {/* Profile Icon or Sign Up Button */}
         <div className="relative">
           {isLoggedIn ? (
             <button className="btn btn-ghost" onClick={toggleProfileMenu}>
@@ -55,21 +96,20 @@ const UserNavbar = ({ isLoggedIn, isAdmin }) => {
               Login
             </Link>
           )}
-          
-          {/* Profile Dropdown */}
+
           {isProfileOpen && isLoggedIn && (
             <div className="absolute right-0 mt-2 w-48 bg-white text-black shadow-lg rounded-lg py-2">
               <Link to="/profile" onClick={() => setIsProfileOpen(false)} className="block px-4 py-2 hover:bg-gray-100">
-                Profile
+                Profil
               </Link>
               {isAdmin && (
                 <Link to="/admin/dashboard" onClick={() => setIsProfileOpen(false)} className="block px-4 py-2 hover:bg-gray-100">
                   Dashboard
                 </Link>
               )}
-              <Link to="/signout" onClick={() => setIsProfileOpen(false)} className="block px-4 py-2 hover:bg-gray-100">
-                Sign Out
-              </Link>
+              <button onClick={handleSignOut} className="block w-full text-left px-4 py-2 hover:bg-gray-100">
+                Logout
+              </button>
             </div>
           )}
         </div>
@@ -91,24 +131,24 @@ const UserNavbar = ({ isLoggedIn, isAdmin }) => {
             </li>
             <li>
               <Link to="/article" onClick={toggleMenu} className={`flex items-center ${isActive("/article")}`}>
-                <FaBook className="mr-2" /> Article
+                <FaBook className="mr-2" /> Artikel
               </Link>
             </li>
             <li>
               <Link to="/videos" onClick={toggleMenu} className={`flex items-center ${isActive("/videos")}`}>
-                <FaVideo className="mr-2" /> Videos
+                <FaVideo className="mr-2" /> Video
               </Link>
             </li>
             <li>
-              <Link to="/forum" onClick={toggleMenu} className={`flex items-center ${isActive("/forum")}`}>
+              <button onClick={handleForumClick} className={`flex items-center ${isActive("/forum")}`}>
                 <FaComments className="mr-2" /> Forum
-              </Link>
+              </button>
             </li>
             {isLoggedIn ? (
               <>
                 <li>
                   <Link to="/profile" onClick={toggleMenu} className="flex items-center">
-                    <FaUserCircle className="mr-2" /> Profile
+                    <FaUserCircle className="mr-2" /> Profil
                   </Link>
                 </li>
                 {isAdmin && (
@@ -119,9 +159,9 @@ const UserNavbar = ({ isLoggedIn, isAdmin }) => {
                   </li>
                 )}
                 <li>
-                  <Link to="/signout" onClick={toggleMenu} className="flex items-center">
-                    Sign Out
-                  </Link>
+                  <button onClick={handleSignOut} className="flex items-center w-full text-left">
+                    Logout
+                  </button>
                 </li>
               </>
             ) : (
@@ -134,6 +174,8 @@ const UserNavbar = ({ isLoggedIn, isAdmin }) => {
           </ul>
         </div>
       )}
+
+      {isModalOpen && <LoginModal onClose={() => setIsModalOpen(false)} />}
     </nav>
   );
 };

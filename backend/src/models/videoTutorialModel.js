@@ -6,7 +6,7 @@ class VideoTutorial {
     this.title = title;
     this.description = description;
     this.videoUrl = videoUrl;
-    this.categoryVideolId = categoryVideoId;
+    this.categoryVideoId = categoryVideoId;
     this.thumbnailUrl = thumbnailUrl;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;

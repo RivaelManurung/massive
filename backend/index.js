@@ -5,33 +5,35 @@ const userRoutes = require("./src/routes/route.js"); // Import routes
 const cors = require("cors");
 const path = require("path");
 
-const PORT = process.env.PORT || 3000; // Default ke port 3000 jika PORT tidak diset
+const PORT = process.env.PORT || 3000; // Default to port 3000 if PORT not set
 const app = express();
 
-// Middleware CORS untuk mengizinkan semua domain (atur sesuai kebutuhan)
+// Middleware CORS for allowing all domains (adjust as needed)
 app.use(cors());
 
-// Middleware untuk parsing request body JSON
+// Middleware for parsing request body JSON
 app.use(express.json());
 
-// Middleware untuk serve static files dari folder uploads
+// Serve static files for images from the correct location (outside src folder)
 app.use(
-  "/uploads/thumbnails",
-  express.static(path.join(__dirname, "uploads/thumbnails"))
+  "/uploads/images",  // Access path for images
+  express.static(path.join(__dirname, "uploads/images"))  // Path to the uploads/images folder outside src
 );
+
+// Serve other static files like videos and thumbnails if needed
 app.use(
   "/uploads/videos",
   express.static(path.join(__dirname, "uploads/videos"))
 );
 app.use(
-  "/uploads/images", // Static folder untuk gambar artikel
-  express.static(path.join(__dirname, "uploads/images"))
+  "/uploads/thumbnails",
+  express.static(path.join(__dirname, "uploads/thumbnails"))
 );
 
-// Gunakan routes yang sudah diimport
+// Use the routes defined in userRoutes
 app.use("/", userRoutes);
 
-// Start server
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

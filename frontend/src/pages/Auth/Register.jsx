@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import logo from "../../assets/logo.png"; 
 
 function RegisterPage() {
   const [name, setName] = useState("");
@@ -62,13 +63,12 @@ function RegisterPage() {
 
   return (
     <div className="flex h-screen items-center justify-center bg-gray-100">
-      <div className="w-3/4 max-w-4xl rounded-lg shadow-lg overflow-hidden grid grid-cols-1 md:grid-cols-2">
-        {/* Bagian Kiri */}
-        <div className="bg-green-800 p-10 text-white flex flex-col items-center justify-center">
-          <h1 className="text-3xl font-bold">Selamat Datang</h1>
-          <p className="mt-4 text-center">
-            Silahkan masuk dengan akun anda untuk mendapatkan informasi terbaru!
-          </p>
+      <div className="w-11/12 max-w-4xl rounded-lg shadow-lg overflow-hidden grid grid-cols-1 md:grid-cols-2">
+        {/* Left section */}
+        <div style={{ backgroundColor: '#055941' }} className="p-10 text-white flex flex-col items-center justify-center">
+          <img src={logo} alt="Logo" className="mb-6 w-48" />
+          <h1 className="text-3xl font-bold mb-4">Selamat Datang</h1>
+          <p className="text-center">Silahkan masuk dengan akun anda untuk mendapatkan informasi terbaru!</p>
         </div>
 
         {/* Bagian Kanan */}
@@ -117,13 +117,13 @@ function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-end items-center mb-6 text-sm text-black">
               <span>Sudah memiliki akun?</span>
-              <a href="/login" className="text-green-600">
+              <a href="/login" className="text-blue-600 ml-1">
                 Masuk
               </a>
             </div>
-            <button type="submit" className="btn btn-success w-full">
+            <button type="submit" className="btn btn-success w-full bg-[#16A34A] text-white">
               Daftar
             </button>
           </form>
