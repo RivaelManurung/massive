@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { formatDate } from "../components/FormatDate";
-import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { formatDate } from "../components/FormatDate"; 
 
 const ARTICLES_API_URL = "http://localhost:4000/artikel";
 const CATEGORIES_API_URL = "http://localhost:4000/categoryArtikel";
@@ -36,15 +35,17 @@ const BlogPage = () => {
         setLoading(false);
       }
     };
+  
     fetchData();
   }, []);
 
   const filteredArticles = articles.filter((article) => {
-    const title = (article.title || "").toLowerCase().trim();
+    const title = (article.judul || "").toLowerCase().trim();
     const matchesSearch = title.includes(searchTerm.toLowerCase().trim());
-    return matchesSearch && (selectedCategory === "Semua" || article.categoryArtikelId === selectedCategory);
+    const matchesCategory =
+      selectedCategory === "Semua" || article.categoryArtikelId === selectedCategory;
+    return matchesSearch && matchesCategory;
   });
-  
 
   const totalPages = Math.ceil(filteredArticles.length / itemsPerPage);
   const currentArticles = filteredArticles.slice(
@@ -61,8 +62,12 @@ const BlogPage = () => {
   };
 
   const handleCategoryChange = (category) => {
-    const categoryId = categories.find((cat) => cat.name === category)?.id || "Semua";
-    setSelectedCategory(categoryId);
+    if (category === "Semua") {
+      setSelectedCategory("Semua");
+    } else {
+      const categoryId = categories.find((cat) => cat.name === category)?.id;
+      setSelectedCategory(categoryId || "Semua");
+    }
     setCurrentPage(1);
   };
 
@@ -72,35 +77,34 @@ const BlogPage = () => {
   };
 
   if (loading) {
-    return <div className="text-center mt-20 text-2xl">Loading...</div>;
+    return <div>Loading...</div>;
   }
 
   return (
     <div className="p-8 max-w-screen-lg mx-auto customGray">
-      <div className="relative mb-8 flex items-center">
-        <span className="p-2 text-gray-600">
-          <FaSearch />
-        </span>
+      <div className="mb-8 flex items-center border border-gray-300 rounded bg-white">
+        <span className="p-2"></span>
         <input
           type="text"
           placeholder="Search by title..."
           value={searchTerm}
           onChange={handleSearchChange}
-          className="input w-full bg-gray-100 p-4 text-lg rounded-lg border border-gray-300 focus:outline-none"
+          className="input input-bordered w-full bg-[#F3F3F3] text-black placeholder-gray-500 rounded-r-lg"
         />
       </div>
 
-      <div className="mb-8">
-        <h2 className="text-4xl font-semibold mb-4">Categories</h2>
-        <div className="flex space-x-4 overflow-auto">
+      <div className="mb-8 bg-white">
+        <h2 className="text-3xl font-bold mb-6 text-black">Kategori</h2>
+        <div className="flex space-x-4">
           {categories.map((category) => (
             <button
               key={category.id}
-              className={`px-4 py-2 rounded-full ${
-                selectedCategory === category.id
-                  ? "bg-green-600 text-white"
-                  : "bg-gray-200 text-gray-600"
-              }`}
+              className="btn border border-black"
+              style={{
+                backgroundColor:
+                  selectedCategory === category.id ? "#09734C" : "rgba(9, 115, 76, 0.22)",
+                color: selectedCategory === category.id ? "white" : "black",
+              }}
               onClick={() => handleCategoryChange(category.name)}
             >
               {category.name}
@@ -109,7 +113,7 @@ const BlogPage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
         {currentArticles.length > 0 ? (
           currentArticles.map((article) => (
             <ArticleCard
@@ -120,36 +124,36 @@ const BlogPage = () => {
             />
           ))
         ) : (
-          <p className="text-center text-xl">No articles found for this category.</p>
+          <p className="text-black">Tidak ada artikel untuk kategori ini!</p>
         )}
       </div>
 
       {totalPages > 1 && (
-        <div className="mt-8 flex justify-center items-center space-x-2">
+        <div className="mt-8 flex justify-center space-x-4">
           <button
-            className="btn"
+            className={`btn ${currentPage === 1 ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-black text-white"} border border-black`}
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
           >
-            <FaArrowLeft />
+            Previous
           </button>
+
           {Array.from({ length: totalPages }, (_, index) => (
             <button
               key={index}
-              className={`px-4 py-2 rounded-lg ${
-                currentPage === index + 1 ? "bg-black text-white" : "bg-gray-200 text-gray-600"
-              }`}
+              className={`btn ${currentPage === index + 1 ? "bg-black text-white" : "bg-white text-black"} border border-black`}
               onClick={() => handlePageChange(index + 1)}
             >
               {index + 1}
             </button>
           ))}
+
           <button
-            className="btn"
+            className={`btn ${currentPage === totalPages ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-black text-white"} border border-black`}
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
-            <FaArrowRight />
+            Next
           </button>
         </div>
       )}
@@ -159,35 +163,54 @@ const BlogPage = () => {
 
 const ArticleCard = ({ article, categories, onClick }) => {
   const imageUrl = `http://localhost:4000${article.imageUrl}`;
-  const formattedDate = formatDate(article.createdAt);
-  const category = categories.find((cat) => cat.id === article.categoryArtikelId)?.name || "N/A";
+  const { judul, createdAt, description, categoryArtikelId } = article;
+
+  const formattedDate = formatDate(createdAt);
+
+  const category = categories.find((cat) => cat.id === categoryArtikelId);
+  const categoryName = category ? category.name : "Unknown Category";
+
+  const truncatedDescription = (description && description.length > 100)
+    ? description.slice(0, 100) + "..."
+    : description || "No description available";
 
   return (
     <div
-      className="card p-6 shadow-lg rounded-lg transition hover:scale-105 transform cursor-pointer bg-white"
+      className="card shadow-md transition-transform transform hover:scale-105 cursor-pointer"
+      style={{ backgroundColor: "white", color: "black" }}
       onClick={() => onClick(article.id)}
     >
       <figure>
         <img
           src={imageUrl}
-          alt={article.title || "Article Image"}
-          className="w-full h-48 object-cover rounded-lg mb-4"
+          alt={judul || "Article Image"}
+          className="w-full h-64 object-cover rounded-t-lg"
         />
       </figure>
-      <div>
-        <h3 className="text-2xl text-gray-800 font-semibold mb-2">{article.title}</h3>
-        <p className="text-sm text-gray-500">{formattedDate}</p>
-        <p className="text-lg mt-2 text-gray-700">
-          {article.description?.slice(0, 100)}...
-        </p>
-        <div className="mt-4 flex items-center">
-          <span className="px-3 py-1 rounded-full bg-green-100 text-green-700">{category}</span>
-          <a
-            href="#"
-            className="ml-auto text-blue-500 hover:underline"
-          >
-            Read More
-          </a>
+      <div className="card-body p-4">
+        <p className="text-sm text-black">{formattedDate}</p>
+        <h3 className="text-xl font-semibold mt-2 text-black">{judul}</h3>
+        <p className="text-black mt-2">{truncatedDescription}</p>
+
+        <div className="card-actions mt-2">
+          {categoryArtikelId && (
+            <span
+              className="badge mr-2"
+              style={{
+                backgroundColor: "rgba(9, 115, 76, 0.22)",
+                color: "black",
+                border: "none",
+                padding: "4px 8px",
+                borderRadius: "4px",
+              }}
+            >
+              {categoryName}
+            </span>
+          )}
+        </div>
+
+        <div className="flex justify-end mt-4">
+          <a href="#" className="text-teal-500 hover:text-teal-600">Read More</a>
         </div>
       </div>
     </div>

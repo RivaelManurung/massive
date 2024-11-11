@@ -93,7 +93,7 @@ const UserNavbar = ({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) => {
             </button>
           ) : (
             <Link to="/login" className="btn btn-outline text-white border-lime-400 hover:bg-lime-600">
-              Login
+              Masuk
             </Link>
           )}
 
@@ -160,14 +160,14 @@ const UserNavbar = ({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) => {
                 )}
                 <li>
                   <button onClick={handleSignOut} className="flex items-center w-full text-left">
-                    Logout
+                    Keluar
                   </button>
                 </li>
               </>
             ) : (
               <li>
                 <Link to="/login" onClick={toggleMenu} className="flex items-center">
-                  Login
+                  Masuk
                 </Link>
               </li>
             )}

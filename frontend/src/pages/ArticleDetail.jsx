@@ -37,9 +37,7 @@ const ArticleDetail = () => {
 
     const fetchCategories = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:4000/categoryArtikel"
-        );
+        const response = await axios.get("http://localhost:4000/categoryArtikel");
         setCategories(response.data);
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -65,14 +63,19 @@ const ArticleDetail = () => {
   }
 
   return (
-    <div className="p-8 max-w-screen-lg mx-auto">
+    <div className="p-8 max-w-screen-lg mx-auto bg-gray-50 rounded-lg shadow-lg">
+      <button
+        onClick={() => navigate(-1)}
+        className="mb-6 px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700 transition"
+      >
+        Back to Articles
+      </button>
+
       <h1 className="text-4xl font-bold mb-4 text-black">{article.title || "No Title"}</h1>
       <div className="text-gray-600 text-sm mb-6">
-        Terbit pada:{" "}
-        {article.createdAt ? formatDate(article.createdAt) : "Unknown Date"} |
-        Kategori:{" "}
-        <span className="font-semibold">
-          {getCategoryName(article.categoryArtikelId)}
+        <span>Published on: {article.createdAt ? formatDate(article.createdAt) : "Unknown Date"}</span> | 
+        <span className="font-semibold ml-2">
+          Category: {getCategoryName(article.categoryArtikelId)}
         </span>
       </div>
 
@@ -81,7 +84,7 @@ const ArticleDetail = () => {
         <img
           src={`http://localhost:4000${article.imageUrl}`}
           alt={article.title}
-          className="w-full h-64 object-cover rounded-lg mb-6"
+          className="w-full h-64 object-cover rounded-lg mb-6 shadow-md"
         />
       )}
 
@@ -89,49 +92,39 @@ const ArticleDetail = () => {
         {article.description || "No description available"}
       </p>
 
+      {/* Latest Articles Section */}
       <div className="mt-12">
         <h2 className="text-2xl font-semibold mb-4 text-black">Artikel Terbaru</h2>
-        <div className="flex overflow-x-auto gap-8">
+        <div className="flex overflow-x-auto gap-8 pb-4">
           {latestArticles.slice(0, 5).map((latestArticle) => (
             <div
               key={latestArticle.id}
-              className="card shadow-md transition-transform transform hover:scale-105 cursor-pointer"
-              style={{ backgroundColor: "white", color: "black", minWidth: "250px" }}
+              className="flex-none card p-4 bg-white shadow-md transition-transform transform hover:scale-105 cursor-pointer rounded-lg w-60"
               onClick={() => handleArticleClick(latestArticle.id)}
             >
               <figure>
                 <img
                   src={`http://localhost:4000${latestArticle.imageUrl}`}
                   alt={latestArticle.title}
-                  className="w-full h-64 object-cover rounded-t-lg"
+                  className="w-full h-40 object-cover rounded-t-lg"
                 />
               </figure>
-              <div className="card-body p-4">
-                <h3 className="text-xl font-semibold text-black">{latestArticle.title}</h3>
-                <p className="text-sm text-gray-500">
-                  {formatDate(latestArticle.createdAt)}
-                </p>
-                <p className="text-black mt-2">
+              <div className="card-body mt-4">
+                <h3 className="text-xl font-semibold text-black mb-2">{latestArticle.title}</h3>
+                <p className="text-sm text-gray-500 mb-2">{formatDate(latestArticle.createdAt)}</p>
+                <p className="text-gray-700 text-sm mb-4">
                   {latestArticle.description?.slice(0, 100)}...
                 </p>
-                <div className="card-actions mt-4">
-                  <span
-                    className="badge"
-                    style={{
-                      backgroundColor: "rgba(9, 115, 76, 0.22)",
-                      color: "black",
-                      padding: "4px 8px",
-                      borderRadius: "4px",
-                    }}
-                  >
-                    {getCategoryName(latestArticle.categoryArtikelId)}
-                  </span>
-                </div>
+                <span className="inline-block text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                  {getCategoryName(latestArticle.categoryArtikelId)}
+                </span>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      
     </div>
   );
 };
