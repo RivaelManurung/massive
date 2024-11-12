@@ -202,66 +202,6 @@ const Home = () => {
               </div>
             </div>
 
-            {/* Tambahan Fitur */}
-            {/* Webinar */}
-            <div className="card bg-white shadow-xl hover:shadow-2xl transition-shadow duration-300">
-              <div className="card-body">
-                <div className="w-16 h-16 mask mask-squircle bg-green-600 flex items-center justify-center mb-4">
-                  <FaSeedling className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="card-title text-green-600">Webinar Pertanian</h3>
-                <p className="text-gray-700">
-                  Ikuti webinar dan seminar online dengan para ahli pertanian terkemuka.
-                </p>
-                <div className="card-actions justify-end">
-                  <Link to="/webinars">
-                    <button className="btn btn-green-400 text-white btn-sm flex items-center">
-                      Selengkapnya <FaArrowRight className="ml-2" />
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            {/* E-Books */}
-            <div className="card bg-white shadow-xl hover:shadow-2xl transition-shadow duration-300">
-              <div className="card-body">
-                <div className="w-16 h-16 mask mask-squircle bg-green-600 flex items-center justify-center mb-4">
-                  <FaBookReader className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="card-title text-green-600">E-Books</h3>
-                <p className="text-gray-700">
-                  Akses berbagai e-book pertanian untuk referensi dan studi mendalam.
-                </p>
-                <div className="card-actions justify-end">
-                  <Link to="/ebooks">
-                    <button className="btn btn-green-400 text-white btn-sm flex items-center">
-                      Selengkapnya <FaArrowRight className="ml-2" />
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            {/* Marketplace */}
-            <div className="card bg-white shadow-xl hover:shadow-2xl transition-shadow duration-300">
-              <div className="card-body">
-                <div className="w-16 h-16 mask mask-squircle bg-green-600 flex items-center justify-center mb-4">
-                  <FaUsers className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="card-title text-green-600">Marketplace</h3>
-                <p className="text-gray-700">
-                  Jual beli alat pertanian dan produk lainnya langsung dari komunitas.
-                </p>
-                <div className="card-actions justify-end">
-                  <Link to="/marketplace">
-                    <button className="btn btn-green-400 text-white btn-sm flex items-center">
-                      Selengkapnya <FaArrowRight className="ml-2" />
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -382,74 +322,9 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Call to Action Section */}
-      <div className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-green-600 mb-4">Mulai Perjalanan Anda Sekarang!</h2>
-          <p className="text-lg text-gray-700 mb-8">
-            Bergabunglah dengan ribuan petani lainnya yang telah meningkatkan produktivitas dan keberlanjutan pertanian mereka melalui platform kami.
-          </p>
-          <Link to="/signup">
-            <button className="btn btn-green-400 btn-lg flex items-center mx-auto">
-              Daftar Sekarang <FaArrowRight className="ml-2" />
-            </button>
-          </Link>
-        </div>
-      </div>
+      
 
-      {/* Footer Section */}
-      <footer className="bg-green-600 text-white py-10">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row justify-between">
-            <div className="mb-6 lg:mb-0">
-              <h3 className="text-xl font-bold mb-4">Platform Pertanian</h3>
-              <p className="text-gray-200">Mendukung petani untuk masa depan yang lebih baik.</p>
-            </div>
-            <div className="mb-6 lg:mb-0">
-              <h4 className="text-lg font-semibold mb-4">Navigasi</h4>
-              <ul>
-                <li className="mb-2">
-                  <Link to="/article" className="hover:underline text-gray-200">
-                    Artikel
-                  </Link>
-                </li>
-                <li className="mb-2">
-                  <Link to="/videos" className="hover:underline text-gray-200">
-                    Video
-                  </Link>
-                </li>
-                <li className="mb-2">
-                  <Link to="/forum" className="hover:underline text-gray-200">
-                    Forum
-                  </Link>
-                </li>
-                <li className="mb-2">
-                  <Link to="/about" className="hover:underline text-gray-200">
-                    Tentang Kami
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Ikuti Kami</h4>
-              <div className="flex space-x-4">
-                <a href="#" className="hover:text-gray-400">
-                  <FaFacebookF />
-                </a>
-                <a href="#" className="hover:text-gray-400">
-                  <FaTwitter />
-                </a>
-                <a href="#" className="hover:text-gray-400">
-                  <FaInstagram />
-                </a>
-              </div>
-            </div>
-          </div>
-          <div className="mt-10 text-center text-gray-400">
-            &copy; {new Date().getFullYear()} Platform Pertanian. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      
     </div>
   );
 };

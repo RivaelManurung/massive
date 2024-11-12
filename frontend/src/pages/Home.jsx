@@ -13,10 +13,16 @@ import { Link } from "react-router-dom";
 
 const Home = () => {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#f3f0e6]">
       {/* Hero Section */}
-      <div className="hero min-h-screen bg-white">
-        <div className="hero-content flex-col lg:flex-row-reverse gap-8">
+      <div
+        className="hero min-h-screen bg-fixed bg-center bg-cover"
+        style={{
+          backgroundImage: `url(${farmImage})`,
+        }}
+      >
+        <div className="hero-overlay bg-opacity-50 bg-[#355e3b]"></div>
+        <div className="hero-content flex-col lg:flex-row gap-8 text-white">
           <div className="lg:w-1/2">
             <img
               src={farmImage}
@@ -24,124 +30,60 @@ const Home = () => {
               alt="Agriculture"
             />
           </div>
-          <div className="lg:w-1/2">
-            <div className="badge badge-success gap-2 mb-4">
-              <FaLeaf /> Platform Pembelajaran Pertanian
-            </div>
-            <h1 className="text-5xl text-black font-bold leading-tight">
+          <div className="lg:w-1/2 text-center lg:text-left">
+            <h1 className="text-5xl font-bold leading-tight">
               Belajar Pertanian{" "}
-              <span className="text-green-600">Untuk Masa Depan</span>
+              <span className="text-[#a8e063]">Untuk Masa Depan</span>
             </h1>
-            <p className="py-6 text-black text-lg">
-              Platform pembelajaran digital yang membantu petani meningkatkan
-              produktivitas dan keberlanjutan pertanian melalui teknologi modern
-              dan praktik terbaik.
+            <p className="py-6 text-lg">
+              Tingkatkan produktivitas pertanian Anda dengan teknologi modern
+              dan praktik terbaik untuk keberlanjutan yang lebih baik.
             </p>
-            <div className="flex gap-4 flex-wrap">
-              <Link to="/article">
-                <button className="btn btn-green-600 btn-lg">
-                  Mulai Belajar <FaArrowRight className="ml-2" />
-                </button>
-              </Link>
-            </div>
+            <Link to="/article">
+              <button className="btn bg-[#a8e063] text-black btn-lg px-6 rounded-full shadow-md hover:bg-green-500">
+                Mulai Belajar <FaArrowRight className="ml-2" />
+              </button>
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* About Section */}
-      {/* <div className="py-20 bg-gray-100">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-green-600 mb-4">
-              Tentang Kami
-            </h2>
-            <p className="text-lg text-gray-700">
-              Kami adalah platform edukasi pertanian yang berkomitmen untuk
-              mendukung petani di seluruh Indonesia dengan memberikan akses
-              mudah ke informasi terkini, praktik terbaik, dan teknologi yang
-              relevan. Di sini, petani dapat belajar, berbagi pengalaman, dan
-              mengembangkan keterampilan yang dibutuhkan untuk mencapai
-              pertanian yang lebih produktif dan berkelanjutan.
-            </p>
-          </div>
-        </div>
-      </div> */}
-
       {/* Features Section */}
-      <div className="py-20 bg-white">
+      <div className="py-20 bg-[#f9f5eb]">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-2xl font-bold text-green-600 mb-2">
+            <h2 className="text-3xl font-bold text-[#355e3b] mb-2">
               Fitur Unggulan
             </h2>
-            <p className="text-4xl font-bold">
-              Cara Lebih Baik untuk Belajar Pertanian
+            <p className="text-xl font-semibold text-[#2d4739]">
+              Temukan cara terbaik untuk belajar dan bertani dengan teknologi
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {/* Artikel */}
-            <div className="card bg-white shadow-xl hover:shadow-2xl transition-all">
-              <div className="card-body">
-                <div className="w-16 h-16 mask mask-squircle bg-green-600 flex items-center justify-center mb-4">
-                  <FaBookReader className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="card-title">Artikel Terbaru</h3>
-                <p>
-                  Konten artikel yang kaya informasi untuk menambah pengetahuan
-                  Anda.
-                </p>
-                <div className="card-actions justify-end">
-                  <Link to="/article">
-                    <button className="btn btn-green-600 text-white btn-sm">
-                      Selengkapnya
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            </div>
+            <FeatureCard
+              title="Artikel Terbaru"
+              description="Informasi dan wawasan terbaru untuk menunjang pengetahuan pertanian Anda."
+              icon={<FaBookReader />}
+              link="/article"
+            />
 
             {/* Video */}
-            <div className="card bg-white shadow-xl hover:shadow-2xl transition-all">
-              <div className="card-body">
-                <div className="w-16 h-16 mask mask-squircle bg-green-600 flex items-center justify-center mb-4">
-                  <FaVideo className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="card-title">Video Pembelajaran</h3>
-                <p>
-                  Video tutorial interaktif untuk pembelajaran yang lebih
-                  efektif.
-                </p>
-                <div className="card-actions justify-end">
-                  <Link to="/videos">
-                    <button className="btn btn-green-600 btn-sm">
-                      Selengkapnya
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            </div>
+            <FeatureCard
+              title="Video Pembelajaran"
+              description="Tutorial video yang interaktif dan memudahkan pembelajaran."
+              icon={<FaVideo />}
+              link="/videos"
+            />
 
             {/* Forum */}
-            <div className="card bg-white shadow-xl hover:shadow-2xl transition-all">
-              <div className="card-body">
-                <div className="w-16 h-16 mask mask-squircle bg-green-600 flex items-center justify-center mb-4">
-                  <FaUsers className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="card-title">Forum Diskusi</h3>
-                <p>
-                  Tempat berdiskusi, berbagi pengetahuan, dan pengalaman antar
-                  anggota.
-                </p>
-                <div className="card-actions justify-end">
-                  <Link to="/forum">
-                    <button className="btn btn-green-600 btn-sm">
-                      Selengkapnya
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            </div>
+            <FeatureCard
+              title="Forum Diskusi"
+              description="Berdiskusi, berbagi pengalaman, dan menemukan solusi bersama komunitas."
+              icon={<FaUsers />}
+              link="/forum"
+            />
           </div>
         </div>
       </div>
@@ -150,50 +92,72 @@ const Home = () => {
       <div className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-2xl font-bold text-green-600 mb-2">
+            <h2 className="text-3xl font-bold text-[#355e3b] mb-2">
               Apa Kata Petani?
             </h2>
-            <p className="text-4xl font-bold">Cerita dan Inspirasi</p>
+            <p className="text-xl font-semibold text-[#2d4739]">
+              Cerita Inspirasi dari Komunitas
+            </p>
           </div>
 
-          <div className="overflow-x-scroll space-x-4 flex">
-            {/* Testimonial Cards */}
+          <div className="flex overflow-x-scroll space-x-6 pb-4 scrollbar-hidden">
             {[...Array(5)].map((_, index) => (
-              <div
-                key={index}
-                className="min-w-[300px] card bg-white shadow-xl mx-2 flex-shrink-0"
-              >
-                <div className="card-body">
-                  <FaQuoteLeft className="text-green-600 text-2xl mb-4" />
-                  <p className="text-black">
-                    {index === 0 &&
-                      `"Dengan platform ini, saya belajar teknik baru yang meningkatkan hasil panen saya."`}
-                    {index === 1 &&
-                      `"Komunitasnya sangat membantu, banyak ilmu dan pengalaman yang dibagikan."`}
-                    {index === 2 &&
-                      `"Panduan praktiknya sangat jelas dan mudah diterapkan di lapangan."`}
-                    {index === 3 &&
-                      `"Saya jadi lebih memahami cara merawat tanaman agar lebih produktif."`}
-                    {index === 4 &&
-                      `"Dukungan dari komunitas sangat membantu saya menghadapi tantangan sehari-hari."`}
-                  </p>
-                  <div className="mt-4 text-right text-black">
-                    —{" "}
-                    {index === 0
-                      ? "Budi, Petani Padi"
-                      : index === 1
-                      ? "Siti, Petani Sayur"
-                      : index === 2
-                      ? "Andi, Petani Buah"
-                      : index === 3
-                      ? "Tono, Petani Cabai"
-                      : "Dewi, Petani Buah"}
-                  </div>
-                </div>
-              </div>
+              <TestimonialCard key={index} index={index} />
             ))}
           </div>
         </div>
+      </div>
+    </div>
+  );
+};
+
+const FeatureCard = ({ title, description, icon, link }) => (
+  <div className="card bg-white shadow-xl hover:shadow-2xl transition-all p-6 rounded-lg">
+    <div className="w-16 h-16 mask mask-squircle bg-[#355e3b] flex items-center justify-center mb-4 text-white">
+      {icon}
+    </div>
+    <h3 className="card-title text-xl font-semibold text-[#355e3b]">{title}</h3>
+    <p className="text-gray-700 mb-4">{description}</p>
+    <div className="card-actions justify-end">
+      <Link to={link}>
+        <button className="btn bg-[#a8e063] text-black btn-sm rounded-full hover:bg-green-500">
+          Selengkapnya
+        </button>
+      </Link>
+    </div>
+  </div>
+);
+
+const TestimonialCard = ({ index }) => {
+  const testimonials = [
+    {
+      text: `"Dengan platform ini, saya belajar teknik baru yang meningkatkan hasil panen saya."`,
+      name: "Budi, Petani Padi",
+    },
+    {
+      text: `"Komunitasnya sangat membantu, banyak ilmu dan pengalaman yang dibagikan."`,
+      name: "Siti, Petani Sayur",
+    },
+    {
+      text: `"Panduan praktiknya sangat jelas dan mudah diterapkan di lapangan."`,
+      name: "Andi, Petani Buah",
+    },
+    {
+      text: `"Saya jadi lebih memahami cara merawat tanaman agar lebih produktif."`,
+      name: "Tono, Petani Cabai",
+    },
+    {
+      text: `"Dukungan dari komunitas sangat membantu saya menghadapi tantangan sehari-hari."`,
+      name: "Dewi, Petani Buah",
+    },
+  ];
+
+  return (
+    <div className="min-w-[300px] card bg-white shadow-lg rounded-lg p-6">
+      <FaQuoteLeft className="text-[#a8e063] text-3xl mb-4" />
+      <p className="text-gray-700 italic mb-4">{testimonials[index].text}</p>
+      <div className="text-right text-gray-800 font-semibold">
+        — {testimonials[index].name}
       </div>
     </div>
   );
