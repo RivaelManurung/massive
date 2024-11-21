@@ -12,10 +12,23 @@ const categoryVideoController = require("../controller/categoryVideoController")
 const videoTutorialController = require("../controller/videoTutorialController");
 
 // --- USER ROUTES ---
+// --- USER ROUTES ---
+// Register User
 router.post("/register", userController.createNewUser);
+// Login User
 router.post("/login", userController.loginUser);
+// Logout User
 router.post("/logout", userController.logoutUser);
+// Get All Users (Authenticated)
 router.get("/getAllUser", authenticateJWT, userController.getAllUsers);
+// Forgot Password (Sends OTP)
+router.post("/forgot-password", userController.forgotPassword);
+// Reset Password (POST with OTP and new password)
+router.post("/reset-password", userController.resetPassword);
+// Verify OTP for Password Reset (GET)
+router.get("/reset-password/verify/:otp", userController.verifyOTP); 
+
+
 
 // --- CATEGORY ARTIKEL ROUTES ---
 router.get("/categoryArtikel", categoryArtikelController.getAllCategoryArtikel);

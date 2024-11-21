@@ -95,6 +95,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import Login from "./pages/Auth/Login";
 import RegisterPage from "./pages/Auth/Register";
 import Profile from "./pages/Profile";
+import WeatherCard from "./pages/WeatherCard";
 
 function App() {
   const location = useLocation();
@@ -132,6 +133,8 @@ function App() {
           <Route path="/videos" element={<Videos />} />
           <Route path="/video/:id" element={<VideoDetail />} />
           <Route path="/profile" element={<Profile />} />
+
+          <Route path="/cuaca" element={<WeatherCard />} />
 
 
           <Route

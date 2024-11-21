@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   FaUsers,
   FaLeaf,
@@ -10,8 +10,17 @@ import {
 } from "react-icons/fa";
 import farmImage from "../assets/images-1.jpg";
 import { Link } from "react-router-dom";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const Home = () => {
+  useEffect(() => {
+    AOS.init({
+      duration: 800, // Durasi animasi dalam milidetik
+      once: true,    // Animasi hanya berjalan sekali
+    });
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#f3f0e6]">
       {/* Hero Section */}
@@ -20,17 +29,25 @@ const Home = () => {
         style={{
           backgroundImage: `url(${farmImage})`,
         }}
+        data-aos="fade-in"
       >
         <div className="hero-overlay bg-opacity-50 bg-[#355e3b]"></div>
-        <div className="hero-content flex-col lg:flex-row gap-8 text-white">
+        <div
+          className="hero-content flex-col lg:flex-row gap-8 text-white"
+          data-aos="fade-up"
+        >
           <div className="lg:w-1/2">
             <img
               src={farmImage}
               className="rounded-lg shadow-2xl w-full h-[400px] object-cover hover:scale-105 transition duration-300"
               alt="Agriculture"
+              data-aos="zoom-in"
             />
           </div>
-          <div className="lg:w-1/2 text-center lg:text-left">
+          <div
+            className="lg:w-1/2 text-center lg:text-left"
+            data-aos="fade-left"
+          >
             <h1 className="text-5xl font-bold leading-tight">
               Belajar Pertanian{" "}
               <span className="text-[#a8e063]">Untuk Masa Depan</span>
@@ -49,9 +66,9 @@ const Home = () => {
       </div>
 
       {/* Features Section */}
-      <div className="py-20 bg-[#f9f5eb]">
+      <div className="py-20 bg-[#f9f5eb]" data-aos="fade-up">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-aos="fade-up">
             <h2 className="text-3xl font-bold text-[#355e3b] mb-2">
               Fitur Unggulan
             </h2>
@@ -60,7 +77,10 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          <div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
+            data-aos="fade-up"
+          >
             {/* Artikel */}
             <FeatureCard
               title="Artikel Terbaru"
@@ -89,9 +109,9 @@ const Home = () => {
       </div>
 
       {/* Testimonials Section */}
-      <div className="py-20 bg-white">
+      <div className="py-20 bg-white" data-aos="fade-up">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-aos="fade-up">
             <h2 className="text-3xl font-bold text-[#355e3b] mb-2">
               Apa Kata Petani?
             </h2>
@@ -100,7 +120,10 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="flex overflow-x-scroll space-x-6 pb-4 scrollbar-hidden">
+          <div
+            className="flex overflow-x-scroll space-x-6 pb-4 scrollbar-hidden"
+            data-aos="zoom-in"
+          >
             {[...Array(5)].map((_, index) => (
               <TestimonialCard key={index} index={index} />
             ))}
@@ -112,7 +135,10 @@ const Home = () => {
 };
 
 const FeatureCard = ({ title, description, icon, link }) => (
-  <div className="card bg-white shadow-xl hover:shadow-2xl transition-all p-6 rounded-lg">
+  <div
+    className="card bg-white shadow-xl hover:shadow-2xl transition-all p-6 rounded-lg"
+    data-aos="fade-up"
+  >
     <div className="w-16 h-16 mask mask-squircle bg-[#355e3b] flex items-center justify-center mb-4 text-white">
       {icon}
     </div>
@@ -153,7 +179,10 @@ const TestimonialCard = ({ index }) => {
   ];
 
   return (
-    <div className="min-w-[300px] card bg-white shadow-lg rounded-lg p-6">
+    <div
+      className="min-w-[300px] card bg-white shadow-lg rounded-lg p-6"
+      data-aos="fade-up"
+    >
       <FaQuoteLeft className="text-[#a8e063] text-3xl mb-4" />
       <p className="text-gray-700 italic mb-4">{testimonials[index].text}</p>
       <div className="text-right text-gray-800 font-semibold">
