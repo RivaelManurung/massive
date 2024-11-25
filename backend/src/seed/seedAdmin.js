@@ -1,3 +1,4 @@
+require("dotenv").config();
 const mysql = require("mysql2");
 
 const dbpool = mysql.createPool({
@@ -10,5 +11,11 @@ const dbpool = mysql.createPool({
   queueLimit: 0,
 });
 
-
-module.exports = dbpool.promise();
+(async () => {
+  try {
+    const [rows] = await dbpool.promise().query("SELECT 1");
+    console.log("Koneksi berhasil:", rows);
+  } catch (error) {
+    console.error("Error koneksi database:", error.message);
+  }
+})();

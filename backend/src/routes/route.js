@@ -27,7 +27,8 @@ router.post("/forgot-password", userController.forgotPassword);
 router.post("/reset-password", userController.resetPassword);
 // Verify OTP for Password Reset (GET)
 router.get("/reset-password/verify/:otp", userController.verifyOTP); 
-
+// Update User
+router.put("/update-user/:id", userController.updateUser);
 
 
 // --- CATEGORY ARTIKEL ROUTES ---

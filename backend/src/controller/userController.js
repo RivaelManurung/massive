@@ -4,7 +4,7 @@ const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const dbpool = require("../config/database");
 const User = require("../models/userModel");
-const sendResetPasswordEmail = require("../middleware/sendResetPasswordEmail"); // Adjust the path
+const sendResetPasswordEmail = require("../middleware/sendResetPasswordEmail"); 
 
 // Ensure users table exists
 const ensureUsersTableExists = async () => {
@@ -127,7 +127,7 @@ const createNewUser = async (req, res) => {
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
-  // Validate input
+  // Validasi input
   if (!email || !password) {
     return res.status(400).json({
       message: "LOGIN FAILED",
@@ -136,6 +136,7 @@ const loginUser = async (req, res) => {
   }
 
   try {
+    // Ambil data pengguna berdasarkan email
     const [rows] = await dbpool.execute("SELECT * FROM users WHERE email = ?", [
       email,
     ]);
@@ -148,6 +149,8 @@ const loginUser = async (req, res) => {
     }
 
     const user = rows[0];
+
+    // Verifikasi password
     const validPassword = await bcrypt.compare(password, user.password);
 
     if (!validPassword) {
@@ -157,15 +160,28 @@ const loginUser = async (req, res) => {
       });
     }
 
+    // Generate token JWT termasuk role
     const token = jwt.sign(
-      { id: user.id, name: user.name, role: user.role },
+      {
+        id: user.id,
+        name: user.name,
+        role: user.role, // Tambahkan role ke dalam token
+      },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
+    // Kirim respons dengan token dan role
     res.status(200).json({
       message: "LOGIN SUCCESS",
       token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role, // Kirim role ke frontend
+        avatar: user.avatar,
+      },
     });
   } catch (error) {
     res.status(500).json({
@@ -174,6 +190,8 @@ const loginUser = async (req, res) => {
     });
   }
 };
+
+
 
 // Logout user
 const logoutUser = (req, res) => {
@@ -268,7 +286,97 @@ const getResetPasswordPage = async (req, res) => {
   // OTP-based flow doesn't require this step
   res.json({ message: "No need for page rendering in OTP flow" });
 };
+// Update user
+const updateUser = async (req, res) => {
+  const userId = req.params.id;
+  const { name, email, password, phone, avatar, role } = req.body;
 
+  // Validate input
+  if (!name || !email || !phone) {
+    return res.status(400).json({
+      message: "UPDATE USER FAILED",
+      error: "Name, email, and phone are required fields.",
+    });
+  }
+
+  try {
+    // Check if user exists
+    const [userRows] = await dbpool.execute("SELECT * FROM users WHERE id = ?", [userId]);
+    if (userRows.length === 0) {
+      return res.status(404).json({
+        message: "UPDATE USER FAILED",
+        error: "User not found.",
+      });
+    }
+
+    const user = userRows[0];
+
+    // Check if email or phone already exists
+    if (email !== user.email) {
+      const [emailRows] = await dbpool.execute("SELECT * FROM users WHERE email = ?", [email]);
+      if (emailRows.length > 0) {
+        return res.status(409).json({
+          message: "UPDATE USER FAILED",
+          error: "Email already in use.",
+        });
+      }
+    }
+
+    if (phone !== user.phone) {
+      const [phoneRows] = await dbpool.execute("SELECT * FROM users WHERE phone = ?", [phone]);
+      if (phoneRows.length > 0) {
+        return res.status(409).json({
+          message: "UPDATE USER FAILED",
+          error: "Phone number already in use.",
+        });
+      }
+    }
+
+    // Hash new password if provided
+    let updatedPassword = user.password;
+    if (password) {
+      updatedPassword = await bcrypt.hash(password, 10);
+    }
+
+    // Update user data
+    const updateQuery = `
+      UPDATE users 
+      SET name = ?, email = ?, password = ?, phone = ?, avatar = ?, role = ?, updated_at = NOW() 
+      WHERE id = ?
+    `;
+    await dbpool.execute(updateQuery, [
+      name,
+      email,
+      updatedPassword,
+      phone,
+      avatar || user.avatar, // Keep the old avatar if none is provided
+      role || user.role, // Keep the old role if none is provided
+      userId,
+    ]);
+
+    const updatedUser = new User(
+      userId,
+      name,
+      email,
+      updatedPassword,
+      role || user.role,
+      phone,
+      avatar || user.avatar,
+      user.created_at,
+      new Date() // updated_at will be set to NOW() in the query
+    );
+
+    res.status(200).json({
+      message: "UPDATE USER SUCCESS",
+      user: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "UPDATE USER FAILED",
+      error: error.message || error,
+    });
+  }
+};
 module.exports = {
   getAllUsers,
   createNewUser,
@@ -278,4 +386,5 @@ module.exports = {
   resetPassword,
   getResetPasswordPage,
   verifyOTP,
+  updateUser,
 };

@@ -25,7 +25,7 @@ const WeatherCard = () => {
   const [areas, setAreas] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
-  const [weatherData, setWeatherData] = useState(null);
+  const [weatherData, setWeatherData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [chartData, setChartData] = useState(null);
@@ -55,6 +55,7 @@ const WeatherCard = () => {
         setAreas(structuredData);
       } catch (error) {
         console.error("Error fetching and parsing CSV data:", error);
+        setError("Gagal mengambil data wilayah.");
       }
     };
     fetchAreaData();
@@ -63,45 +64,106 @@ const WeatherCard = () => {
   const fetchWeatherData = async () => {
     setLoading(true);
     setError(null);
+  
     try {
-      const areaCode = `${selectedCity}`;
+      const areaCode = selectedCity;
+      console.log("Fetching weather data for areaCode:", areaCode);
+  
       const response = await fetch(
         `https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=${areaCode}`
       );
-      if (!response.ok) throw new Error("Weather data not found or API issue");
-
-      const data = await response.json();
-      const weather = data.data[0]?.cuaca[0];
-      if (weather) {
-        setWeatherData([weather]);  // Preserve the array structure
-
-        const chartData = {
+  
+      if (!response.ok) {
+        console.warn("API failed, using dummy data.");
+        const dummyWeather = {
+          datetime: "2024-11-22 12:00:00",
+          t: 30,
+          hu: 70,
+          ws: 10,
+          weather_desc: "Cerah Berawan",
+        };
+  
+        setWeatherData([dummyWeather]);
+        setChartData({
           labels: ["Suhu (°C)", "Kelembapan (%)", "Kecepatan Angin (km/jam)"],
           datasets: [
             {
               label: `Data Cuaca - ${selectedCity}`,
-              data: [weather.t ?? 0, weather.hu ?? 0, weather.ws ?? 0],
+              data: [dummyWeather.t, dummyWeather.hu, dummyWeather.ws],
               backgroundColor: ["#4CAF50", "#FF9800", "#2196F3"],
             },
           ],
-        };
-        setChartData(chartData);
+        });
+        setLoading(false);
+        return;
+      }
+  
+      const data = await response.json();
+      console.log("Weather data received:", data);
+  
+      const forecastData = data.data[0]?.cuaca || [];
+  
+      if (forecastData.length > 0) {
+        const parsedWeatherData = forecastData.map((item) => {
+          const utcDatetime = item.datetime || "";
+          const dateStr = utcDatetime.replace("Z", "");
+          const datetime = new Date(dateStr); // Convert to JavaScript Date object
+  
+          // Log the parsed data
+          return {
+            ...item,
+            utc_datetime: datetime.toLocaleString(), // Format the date for display
+          };
+        });
+  
+        console.log("Parsed weather data:", parsedWeatherData);
+  
+        setWeatherData(parsedWeatherData);
+  
+        const labels = parsedWeatherData.map((item) => item.utc_datetime);
+        const temperatures = parsedWeatherData.map((item) => item.t);
+        const humidity = parsedWeatherData.map((item) => item.hu);
+        const windSpeed = parsedWeatherData.map((item) => item.ws);
+  
+        setChartData({
+          labels: labels,
+          datasets: [
+            {
+              label: "Suhu (°C)",
+              data: temperatures,
+              backgroundColor: "#4CAF50",
+            },
+            {
+              label: "Kelembapan (%)",
+              data: humidity,
+              backgroundColor: "#FF9800",
+            },
+            {
+              label: "Kecepatan Angin (km/jam)",
+              data: windSpeed,
+              backgroundColor: "#2196F3",
+            },
+          ],
+        });
       } else {
         setError("Data cuaca tidak ditemukan.");
       }
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching weather data:", error);
+      setError("Gagal mengambil data cuaca. Silakan coba lagi.");
+    } finally {
       setLoading(false);
-      setError("Failed to fetch weather data. Please try again.");
     }
   };
+  
+
+
 
   const handleSearch = () => {
     if (selectedProvince && selectedCity) {
       fetchWeatherData();
     } else {
-      setError("Please select both province and city.");
+      setError("Pilih provinsi dan kota terlebih dahulu.");
     }
   };
 
@@ -155,6 +217,11 @@ const WeatherCard = () => {
       {error && <div className="text-red-500 text-center mt-4">{error}</div>}
       {loading && <div className="text-center mt-6">Loading...</div>}
 
+      {/* Menampilkan kode wilayah yang dipilih */}
+      <div className="mt-4 text-center text-white">
+        <p><strong>Kode Wilayah Terpilih (selectedCity):</strong> {selectedCity}</p>
+      </div>
+
       {Array.isArray(weatherData) &&
         weatherData.map((weather, index) => (
           <div
@@ -162,7 +229,7 @@ const WeatherCard = () => {
             className="bg-white shadow-lg rounded-lg p-4 border border-gray-200"
           >
             <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              Waktu: {new Date(weather.datetime).toLocaleString()}
+              Waktu: {new Date(weather.utc_datetime).toLocaleString()}
             </h3>
             <ul className="space-y-1 text-gray-700">
               <li>

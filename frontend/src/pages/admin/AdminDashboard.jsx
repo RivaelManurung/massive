@@ -1,16 +1,11 @@
 import React from 'react';
 import { FaTags, FaFileAlt, FaVideo, FaComments } from 'react-icons/fa';
-import AdminNavbar from "../../components/AdminNavbar.jsx";
 
 const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Admin Navbar */}
-      <AdminNavbar />
-
       {/* Main Content */}
       <main className="flex-1 p-10">
-        {/* Remove the additional navbar here */}
         <h2 className="text-3xl font-semibold mb-8">Dashboard Utama</h2>
 
         {/* Dashboard Content */}
