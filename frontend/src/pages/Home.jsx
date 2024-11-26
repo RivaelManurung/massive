@@ -16,8 +16,8 @@ import "aos/dist/aos.css";
 const Home = () => {
   useEffect(() => {
     AOS.init({
-      duration: 800, // Durasi animasi dalam milidetik
-      once: true,    // Animasi hanya berjalan sekali
+      duration: 800, 
+      once: true,    
     });
   }, []);
 

@@ -20,6 +20,9 @@ import Profile from "./pages/Profile";
 import WeatherCard from "./pages/WeatherCard";
 import CreateArticle from './pages/admin/Articles/CreateArticles'; 
 import EditArticle from './pages/admin/Articles/EditArticles'; 
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+
 
 function App() {
   const [isAdmin, setIsAdmin] = useState(() => {
@@ -85,6 +88,8 @@ function App() {
                 element={<LoginPage setIsLoggedIn={setIsLoggedIn} setIsAdmin={setIsAdmin} />}
               />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
             </Routes>
           </div>
           <Footer />

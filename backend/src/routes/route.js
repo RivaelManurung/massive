@@ -26,14 +26,16 @@ router.post("/forgot-password", userController.forgotPassword);
 // Reset Password (POST with OTP and new password)
 router.post("/reset-password", userController.resetPassword);
 // Verify OTP for Password Reset (GET)
-router.get("/reset-password/verify/:otp", userController.verifyOTP); 
+router.get("/reset-password/verify/:otp", userController.verifyOTP);
 // Update User
 router.put("/update-user/:id", userController.updateUser);
 
-
 // --- CATEGORY ARTIKEL ROUTES ---
 router.get("/categoryArtikel", categoryArtikelController.getAllCategoryArtikel);
-router.get("/categoryArtikel/:id", categoryArtikelController.getCategoryArtikelById); // Route to get category by ID
+router.get(
+  "/categoryArtikel/:id",
+  categoryArtikelController.getCategoryArtikelById
+); // Route to get category by ID
 router.post(
   "/categoryArtikel",
   authenticateJWT,
@@ -52,7 +54,6 @@ router.delete(
   adminMiddleware,
   categoryArtikelController.deleteCategoryArtikel
 );
-
 
 // --- ARTIKEL ROUTES ---
 router.get("/artikel", artikelController.getAllArtikel);

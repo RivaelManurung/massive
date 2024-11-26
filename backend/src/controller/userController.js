@@ -165,7 +165,7 @@ const loginUser = async (req, res) => {
       {
         id: user.id,
         name: user.name,
-        role: user.role, // Tambahkan role ke dalam token
+        role: user.role, 
       },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }

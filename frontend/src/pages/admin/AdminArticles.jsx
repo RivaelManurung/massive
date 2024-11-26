@@ -7,11 +7,21 @@ const AdminArticles = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [notification, setNotification] = useState(null);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [articleToDelete, setArticleToDelete] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchArticlesAndCategories();
   }, []);
+
+  const showNotification = (message, type) => {
+    setNotification({ message, type });
+    setTimeout(() => {
+      setNotification(null);
+    }, 3000);
+  };
 
   const fetchArticlesAndCategories = async () => {
     setLoading(true);
@@ -32,12 +42,35 @@ const AdminArticles = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const confirmDelete = (id) => {
+    setShowDeletePopup(true);
+    setArticleToDelete(id);
+  };
+
+  const cancelDelete = () => {
+    setShowDeletePopup(false);
+    setArticleToDelete(null);
+  };
+
+  const handleDelete = async () => {
     try {
-      await axios.delete(`http://localhost:4000/artikel/${id}`);
-      setArticles(articles.filter((article) => article.id !== id));
+      const token = localStorage.getItem("token");
+      const response = await axios.delete(
+        `http://localhost:4000/artikel/${articleToDelete}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("Response:", response.data);
+      setArticles(articles.filter((article) => article.id !== articleToDelete));
+      showNotification("Artikel berhasil dihapus!", "success");
     } catch (error) {
       console.error("Failed to delete article:", error);
+      showNotification("Gagal menghapus artikel, coba lagi.", "error");
+    } finally {
+      cancelDelete();
     }
   };
 
@@ -49,10 +82,40 @@ const AdminArticles = () => {
 
   return (
     <div className="p-5 font-sans">
+      {notification && (
+        <div
+          className={`fixed top-4 right-4 p-4 rounded shadow-lg text-white ${
+            notification.type === "success" ? "bg-green-500" : "bg-red-500"
+          }`}
+        >
+          {notification.message}
+        </div>
+      )}
+      {showDeletePopup && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <h3 className="text-lg font-semibold">Konfirmasi Hapus</h3>
+            <p>Apakah Anda yakin ingin menghapus artikel ini?</p>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                onClick={cancelDelete}
+                className="bg-gray-500 text-white py-2 px-4 rounded shadow hover:bg-gray-600"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleDelete}
+                className="bg-red-500 text-white py-2 px-4 rounded shadow hover:bg-red-600"
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="bg-[#055941] text-white p-4 rounded-lg flex items-center">
         <h2 className="text-lg font-semibold">Artikel</h2>
       </div>
-
       <div className="mt-4">
         <button
           onClick={() => navigate("/add-article")}
@@ -61,9 +124,7 @@ const AdminArticles = () => {
           + Tambah Artikel
         </button>
       </div>
-
       {error && <div className="text-red-600 mt-4">{error}</div>}
-
       <table className="w-full mt-6 border border-gray-300 rounded-lg">
         <thead className="bg-[#055941] text-white">
           <tr>
@@ -87,13 +148,14 @@ const AdminArticles = () => {
               const category =
                 categories.find((cat) => cat.id === article.categoryArtikelId)
                   ?.name || "No Category";
-
               return (
                 <tr key={article.id} className="border-b">
                   <td className="py-2 px-4">{index + 1}</td>
                   <td className="py-2 px-4">{category}</td>
                   <td className="py-2 px-4">{article.title}</td>
-                  <td className="py-2 px-4">{truncateDescription(article.description)}</td>
+                  <td className="py-2 px-4">
+                    {truncateDescription(article.description)}
+                  </td>
                   <td className="py-2 px-4">
                     {article.imageUrl ? (
                       <img
@@ -113,7 +175,7 @@ const AdminArticles = () => {
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(article.id)}
+                      onClick={() => confirmDelete(article.id)}
                       className="bg-red-500 text-white py-1 px-2 rounded shadow hover:bg-red-600"
                     >
                       Delete

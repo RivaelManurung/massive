@@ -2,19 +2,18 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css"; // Import Quill styles
+import "react-quill/dist/quill.snow.css"; 
 
 const EditArticle = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [categoryArtikelId, setCategoryArtikelId] = useState(1);
-  const [categories, setCategories] = useState([]); // State for categories
-  const [image, setImage] = useState(null); // State for new image
-  const [existingImage, setExistingImage] = useState(""); // State for existing image URL
+  const [categories, setCategories] = useState([]); 
+  const [image, setImage] = useState(null); 
+  const [existingImage, setExistingImage] = useState(""); 
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Fetch article and categories on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -27,7 +26,7 @@ const EditArticle = () => {
         setTitle(article.title);
         setDescription(article.description);
         setCategoryArtikelId(article.categoryArtikelId);
-        setExistingImage(article.imageUrl); // Assuming article has imageUrl
+        setExistingImage(article.imageUrl); 
         setCategories(categoriesResponse.data);
       } catch (error) {
         console.error("Failed to fetch data:", error);
@@ -37,39 +36,54 @@ const EditArticle = () => {
     fetchData();
   }, [id]);
 
-  // Handle form submission
   const handleUpdate = async (e) => {
     e.preventDefault();
-
+  
     if (!title || !description) {
       alert("Judul dan deskripsi tidak boleh kosong!");
       return;
     }
-
+  
     const formData = new FormData();
-    formData.append("judul", title); // Ensure this matches the backend
-    formData.append("deskripsi", description); // Ensure this matches the backend
+    formData.append("judul", title);
+    formData.append("deskripsi", description);
     formData.append("categoryArtikelId", categoryArtikelId);
-    if (image) formData.append("imageUrl", image);
-
+  
+    if (image) {
+      formData.append("image", image); // Ensure the backend expects 'image'
+    }
+  
+    // Log the form data to see what you're sending
+    for (let pair of formData.entries()) {
+      console.log(`${pair[0]}: ${pair[1]}`);
+    }
+  
     const token = localStorage.getItem("token");
-
+  
     try {
-      const response = await axios.put(`http://localhost:4000/artikel/${id}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      navigate("/admin/articles"); // Redirect to admin articles page after update
+      const response = await axios.put(
+        `http://localhost:4000/artikel/${id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("Response:", response.data);
+      navigate("/admin/articles");
     } catch (error) {
       console.error("Failed to update article:", error);
       if (error.response) {
+        console.error("Backend error message:", error.response.data.message);
         alert(`Error: ${error.response.data.message}`);
       }
     }
   };
-
+  
+  
+  
   return (
     <div className="p-5 font-sans">
       <div className="w-full max-w-screen-lg bg-[#055941] text-white p-4 rounded-xl flex items-center">
@@ -77,7 +91,7 @@ const EditArticle = () => {
       </div>
 
       <form onSubmit={handleUpdate} className="mt-5">
-        {/* Title Input */}
+        {/* Title */}
         <input
           type="text"
           placeholder="Judul Artikel"
@@ -86,7 +100,7 @@ const EditArticle = () => {
           onChange={(e) => setTitle(e.target.value)}
         />
 
-        {/* Category Selection */}
+        {/* Category */}
         <div className="mb-5">
           <label htmlFor="category" className="block text-sm font-semibold mb-2">
             Pilih Kategori
@@ -105,7 +119,7 @@ const EditArticle = () => {
           </select>
         </div>
 
-        {/* Quill.js Editor for Description */}
+        {/* Quill.js Editor Description */}
         <ReactQuill
           value={description}
           onChange={setDescription}

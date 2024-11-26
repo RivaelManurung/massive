@@ -20,7 +20,6 @@ function LoginPage({ setIsLoggedIn, setIsAdmin }) {
     }
   }, [setIsLoggedIn, setIsAdmin, navigate]);
 
-
   const handleLogin = async (event) => {
     event.preventDefault(); // Prevent page reload
     try {
@@ -54,7 +53,6 @@ function LoginPage({ setIsLoggedIn, setIsAdmin }) {
       setError("An unexpected error occurred. Please try again later.");
     }
   };
-  
 
   return (
     <div className="flex h-screen items-center justify-center bg-gray-100">
@@ -105,12 +103,19 @@ function LoginPage({ setIsLoggedIn, setIsAdmin }) {
                 Tampilkan Password
               </label>
             </div>
-            <div className="flex justify-end items-center mb-6 text-sm text-black">
+
+            <div className="flex justify-between items-center mb-6 text-sm text-black">
               <span>Belum memiliki akun?</span>
               <a href="/register" className="text-blue-600 ml-1">
                 Daftar
               </a>
             </div>
+            <div className="flex justify-end mb-4">
+              <a href="/forgot-password" className="text-blue-600 text-sm">
+                Lupa Kata Sandi?
+              </a>
+            </div>
+
             <button
               type="submit"
               className="btn btn-success w-full bg-[#16A34A] text-white"
