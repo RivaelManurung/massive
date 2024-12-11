@@ -12,16 +12,20 @@ import VideoDetail from "./pages/VideoDetail";
 import Forum from "./pages/Forum";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminArticles from "./pages/admin/AdminArticles";
+import CreateArticle from './pages/admin/Articles/CreateArticles'; 
+import EditArticle from './pages/admin/Articles/EditArticles'; 
 import AdminVideos from "./pages/admin/AdminVideos";
+import CreateVideo from './pages/admin/Videos/CreateVideos';
+import EditVideo from './pages/admin/Videos/EditVideos';
 import AdminForum from "./pages/admin/AdminForum";
 import LoginPage from "./pages/Auth/Login";
 import RegisterPage from "./pages/Auth/Register";
 import Profile from "./pages/Profile";
 import WeatherCard from "./pages/WeatherCard";
-import CreateArticle from './pages/admin/Articles/CreateArticles'; 
-import EditArticle from './pages/admin/Articles/EditArticles'; 
+
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import Reply from "./pages/ForumReply";
 
 
 function App() {
@@ -54,6 +58,8 @@ function App() {
                 <Route path="/add-article" element={<CreateArticle />} />
                 <Route path="/edit-article/:id" element={<EditArticle />} />
                 <Route path="/admin/videos" element={<AdminVideos />} />
+                <Route path="/add-videos" element={<CreateVideo />} />
+                <Route path="/edit-videos/:id" element={<EditVideo />} />
                 <Route path="/admin/forum" element={<AdminForum />} />
                 <Route path="/" element={<Navigate to="/admin" />} />
               </Routes>
@@ -79,6 +85,8 @@ function App() {
               <Route path="/video/:id" element={<VideoDetail />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/cuaca" element={<WeatherCard />} />
+              <Route path="/forum/:id/reply"  element={<Reply />}/>
+
               <Route
                 path="/forum"
                 element={isLoggedIn ? <Forum /> : <Navigate to="/login" />}

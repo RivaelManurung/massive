@@ -24,6 +24,7 @@ ensureFolderExists(imagesPath);
 // Konfigurasi storage untuk menyimpan file di folder yang sesuai
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
+    // Menentukan folder tujuan berdasarkan fieldname
     if (file.fieldname === "thumbnailUrl") {
       cb(null, thumbnailsPath); // Folder untuk thumbnail
     } else if (file.fieldname === "videoUrl") {
@@ -45,6 +46,7 @@ const fileFilter = (req, file, cb) => {
   const allowedImageTypes = ["image/jpeg", "image/png"];
   const allowedVideoTypes = ["video/mp4"];
 
+  // Validasi berdasarkan fieldname
   if (file.fieldname === "thumbnailUrl" || file.fieldname === "imageUrl") {
     if (allowedImageTypes.includes(file.mimetype)) {
       cb(null, true);
@@ -66,6 +68,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage,
   fileFilter,
+  limits: { fileSize: 10 * 1024 * 1024 }, // Set batasan ukuran file maksimal 10MB
 });
 
 module.exports = upload;

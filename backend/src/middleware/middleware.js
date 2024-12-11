@@ -12,7 +12,7 @@ const authenticateJWT = (req, res, next) => {
         console.error("JWT Error:", err); // Logging error
         return res.status(403).json({ message: "Invalid or expired token" });
       }
-      req.user = user;
+      req.user = user; // Menyimpan user dari token
       next();
     });
   } else {
@@ -22,11 +22,10 @@ const authenticateJWT = (req, res, next) => {
   }
 };
 
-
 // Middleware untuk memastikan hanya admin yang bisa mengakses
 const adminMiddleware = (req, res, next) => {
-  if (req.user.role !== "admin") {
-    return res.status(403).json({ message: "Forbidden: Admins only" }); 
+  if (req.user && req.user.role !== "admin") {
+    return res.status(403).json({ message: "Forbidden: Admins only" });
   }
   next(); // Lanjutkan jika user adalah admin
 };

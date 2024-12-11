@@ -2,15 +2,16 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css"; 
+
+import "react-quill/dist/quill.snow.css";
 
 const EditArticle = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [categoryArtikelId, setCategoryArtikelId] = useState(1);
-  const [categories, setCategories] = useState([]); 
-  const [image, setImage] = useState(null); 
-  const [existingImage, setExistingImage] = useState(""); 
+  const [categories, setCategories] = useState([]);
+  const [image, setImage] = useState(null);
+  const [existingImage, setExistingImage] = useState("");
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -23,13 +24,14 @@ const EditArticle = () => {
         ]);
 
         const article = articleResponse.data;
-        setTitle(article.title);
-        setDescription(article.description);
-        setCategoryArtikelId(article.categoryArtikelId);
-        setExistingImage(article.imageUrl); 
-        setCategories(categoriesResponse.data);
+        setTitle(article.title || "");
+        setDescription(article.description || "");
+        setCategoryArtikelId(article.categoryArtikelId || 1);
+        setExistingImage(article.imageUrl || "");
+        setCategories(categoriesResponse.data || []);
       } catch (error) {
         console.error("Failed to fetch data:", error);
+        alert("Gagal memuat data, silakan coba lagi.");
       }
     };
 
@@ -38,28 +40,23 @@ const EditArticle = () => {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-  
+
     if (!title || !description) {
       alert("Judul dan deskripsi tidak boleh kosong!");
       return;
     }
-  
+
     const formData = new FormData();
     formData.append("judul", title);
     formData.append("deskripsi", description);
-    formData.append("categoryArtikelId", categoryArtikelId);
-  
+    formData.append("categoryArtikelId", parseInt(categoryArtikelId, 10));
+
     if (image) {
-      formData.append("image", image); // Ensure the backend expects 'image'
+      formData.append("image", image);
     }
-  
-    // Log the form data to see what you're sending
-    for (let pair of formData.entries()) {
-      console.log(`${pair[0]}: ${pair[1]}`);
-    }
-  
+
     const token = localStorage.getItem("token");
-  
+
     try {
       const response = await axios.put(
         `http://localhost:4000/artikel/${id}`,
@@ -72,18 +69,16 @@ const EditArticle = () => {
         }
       );
       console.log("Response:", response.data);
+      alert("Artikel berhasil diperbarui!");
       navigate("/admin/articles");
     } catch (error) {
       console.error("Failed to update article:", error);
       if (error.response) {
-        console.error("Backend error message:", error.response.data.message);
-        alert(`Error: ${error.response.data.message}`);
+        alert(`Error: ${error.response.data.message || "Terjadi kesalahan."}`);
       }
     }
   };
-  
-  
-  
+
   return (
     <div className="p-5 font-sans">
       <div className="w-full max-w-screen-lg bg-[#055941] text-white p-4 rounded-xl flex items-center">
