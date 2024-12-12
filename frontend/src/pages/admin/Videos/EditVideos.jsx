@@ -13,6 +13,8 @@ const EditVideo = () => {
   const [existingVideo, setExistingVideo] = useState("");
   const [thumbnailFile, setThumbnailFile] = useState(null); // Add state for thumbnail file
   const [existingThumbnail, setExistingThumbnail] = useState(""); // Add state for existing thumbnail
+  const [notification, setNotification] = useState(null); // Notification state
+
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -73,19 +75,32 @@ const EditVideo = () => {
           },
         }
       );
-      console.log("Response:", response.data);
-      alert("Video berhasil diperbarui!");
-      navigate("/admin/videos");
+      setNotification({ message: "Video berhasil diperbarui!", type: "success" });
+      setTimeout(() => {
+        setNotification(null);
+        navigate("/admin/videos"); // Redirect after successful creation
+      }, 3000);
     } catch (error) {
-      console.error("Failed to update video:", error);
+      console.error("Failed to create video:", error);
       if (error.response) {
-        alert(`Error: ${error.response.data.message || "Terjadi kesalahan."}`);
+        console.error("Server responded with:", error.response.data);
+        setNotification({ message: error.response.data.message, type: "error" });
+        setTimeout(() => setNotification(null), 3000);
       }
     }
   };
 
   return (
     <div className="p-5 font-sans">
+      {notification && (
+        <div
+          className={`fixed top-4 right-4 p-4 rounded shadow-lg text-white ${
+            notification.type === "success" ? "bg-green-500" : "bg-red-500"
+          }`}
+        >
+          {notification.message}
+        </div>
+      )}
       <div className="w-full max-w-screen-lg bg-[#055941] text-white p-4 rounded-xl flex items-center">
         <h2 className="text-xl font-semibold">Edit Video</h2>
       </div>

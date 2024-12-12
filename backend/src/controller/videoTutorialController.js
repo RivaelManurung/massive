@@ -157,49 +157,76 @@ const updateVideoTutorial = async (req, res) => {
   const { id } = req.params;
   const { title, description, categoryVideoId } = req.body;
 
-  const videoUrl = req.files.videoUrl
-    ? `/uploads/videos/${req.files.videoUrl[0].filename}`
-    : null;
-  const thumbnailUrl = req.files.thumbnailUrl
-    ? `/uploads/thumbnails/${req.files.thumbnailUrl[0].filename}`
-    : null;
-
-  if (!title || !description || !videoUrl || !thumbnailUrl) {
-    return res.status(400).json({
-      message: "Title, description, videoUrl, and thumbnailUrl are required fields.",
-    });
-  }
-
   try {
-    const SQLQuery = `
-      UPDATE videoTutorial 
-      SET title = ?, description = ?, videoUrl = ?, thumbnailUrl = ?, categoryVideoId = ?, updated_at = NOW() 
-      WHERE id = ?
-    `;
-    const [result] = await dbpool.execute(SQLQuery, [
-      title,
-      description,
-      videoUrl,
-      thumbnailUrl,
-      categoryVideoId || null,
-      id,
-    ]);
+    // First, fetch the existing video tutorial
+    const [existingRows] = await dbpool.execute(
+      'SELECT title, description, videoUrl, thumbnailUrl, categoryVideoId FROM videoTutorial WHERE id = ?', 
+      [id]
+    );
+
+    if (existingRows.length === 0) {
+      throw new Error("Video tutorial not found");
+    }
+
+    // Prepare update values, using existing values if not provided
+    const updateTitle = title || existingRows[0].title;
+    const updateDescription = description || existingRows[0].description;
+    const updateCategoryVideoId = categoryVideoId || existingRows[0].categoryVideoId;
+
+    // Handle file updates
+    let updateVideoUrl = existingRows[0].videoUrl;
+    let updateThumbnailUrl = existingRows[0].thumbnailUrl;
+
+    // Update video file if provided
+    if (req.files && req.files.videoUrl) {
+      updateVideoUrl = `/uploads/videos/${req.files.videoUrl[0].filename}`;
+    }
+
+    // Update thumbnail if provided
+    if (req.files && req.files.thumbnailUrl) {
+      updateThumbnailUrl = `/uploads/thumbnails/${req.files.thumbnailUrl[0].filename}`;
+    }
+
+    // Validate that we have all required fields
+    if (!updateTitle || !updateDescription || !updateVideoUrl || !updateThumbnailUrl) {
+      throw new Error("Title, description, videoUrl, and thumbnailUrl are required fields");
+    }
+
+    // Create update fields
+    const updatedFields = {
+      title: updateTitle,
+      description: updateDescription,
+      videoUrl: updateVideoUrl,
+      thumbnailUrl: updateThumbnailUrl,
+      categoryVideoId: updateCategoryVideoId,
+    };
+
+    // Create set clause
+    const setClause = Object.keys(updatedFields).map((key) => `${key} = ?`).join(", ");
+
+    // Create values array
+    const values = [...Object.values(updatedFields), id];
+
+    // Perform the update
+    const SQLQuery = `UPDATE videoTutorial SET ${setClause}, updated_at = NOW() WHERE id = ?`;
+    const [result] = await dbpool.execute(SQLQuery, values);
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Video tutorial not found." });
+      throw new Error("Tidak ada perubahan pada data");
     }
 
     res.json({
       message: "Video tutorial updated successfully.",
+      updatedFields: updatedFields,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
-      message: "Failed to update video tutorial",
+      message: "Gagal update video tutorial",
       serverMessage: error.message,
     });
   }
 };
-
 // Delete video tutorial
 const deleteVideoTutorial = async (req, res) => {
   const { id } = req.params;
