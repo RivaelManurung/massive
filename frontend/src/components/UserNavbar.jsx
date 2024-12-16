@@ -113,7 +113,7 @@ const UserNavbar = ({ isLoggedIn, setIsLoggedIn }) => {
                   <ul className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg w-48 text-black z-50">
                     <li>
                       <Link
-                        to="/profile"
+                        to={`/profile/${user?.id}`}
                         className="block px-4 py-2 hover:bg-gray-100"
                       >
                         Profil

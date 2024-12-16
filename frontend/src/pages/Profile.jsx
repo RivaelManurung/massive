@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import imgprofile from "../assets/images-1.jpg"; // Placeholder image
+import axios from 'axios';
+import { useParams } from 'react-router-dom'; // Import useParams
 
-function Profile({ userId }) { // Assuming userId is passed as a prop
+function Profile() {
+  const { userId } = useParams(); // Get userId from the URL parameters
   const [profileData, setProfileData] = useState({
     name: '',
     email: '',
@@ -10,19 +13,29 @@ function Profile({ userId }) { // Assuming userId is passed as a prop
     address: '',
     profilePicture: null,
   });
-  
+
   const [isEditable, setIsEditable] = useState(false); // Track edit mode
   const [loading, setLoading] = useState(true); // Track loading state
 
   // Simulating fetching user profile data from API
   useEffect(() => {
     const fetchProfileData = async () => {
-      try {
-        // Simulating an API response (replace with your actual fetch logic)
-        const response = await fetch(`/api/getProfile/${userId}`); // Fetch the profile based on user ID
-        const data = await response.json();
+      const token = localStorage.getItem("token"); // Get the token
 
-        setProfileData(data); // Assuming API returns the profile data
+      // Check if userId is valid before making the request
+      if (!userId) {
+        console.error("User ID is undefined or invalid");
+        return;
+      }
+
+      try {
+        const response = await axios.get(`http://localhost:4000/users/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = response.data; // Assuming API returns the profile data
+        setProfileData(data);
       } catch (error) {
         console.error("Error fetching profile data", error);
       } finally {
@@ -31,13 +44,13 @@ function Profile({ userId }) { // Assuming userId is passed as a prop
     };
 
     fetchProfileData();
-  }, [userId]);
+  }, [userId]); // Re-run when userId changes
 
   // Handle file input change
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setProfileData({ ...profileData, profilePicture: URL.createObjectURL(file) });
+      setProfileData({ ...profileData, profilePicture: file });
     }
   };
 
@@ -48,22 +61,21 @@ function Profile({ userId }) { // Assuming userId is passed as a prop
 
   // Handle Save button click
   const handleSaveClick = async () => {
-    setIsEditable(false);
+    const formData = new FormData();
+    formData.append("name", profileData.name);
+    formData.append("email", profileData.email);
+    if (profileData.profilePicture) {
+      formData.append("profilePicture", profileData.profilePicture);
+    }
 
-    // Here, send the updated data to your backend API
     try {
-      const response = await fetch(`/api/updateProfile/${userId}`, { // Include user ID in URL
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(profileData), // Send updated profile data
-      });
+      const response = await axios.put(`http://localhost:4000/api/updateProfile/${userId}`, formData); // Corrected the API method
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response.status === 200) {
+        const data = response.data;
         console.log('Profile updated successfully', data);
-        // Handle successful update (e.g., show a success message)
+        setProfileData(data); // Update profile data after successful update
+        setIsEditable(false);
       } else {
         console.error('Failed to update profile');
       }
@@ -83,7 +95,10 @@ function Profile({ userId }) { // Assuming userId is passed as a prop
         {/* Profile Picture */}
         <div className="avatar">
           <div className="w-24 h-24 ring ring-primary ring-offset-2">
-            <img src={profileData.profilePicture || imgprofile} alt="Profile" />
+            <img
+              src={profileData.profilePicture ? URL.createObjectURL(profileData.profilePicture) : imgprofile}
+              alt="Profile"
+            />
           </div>
         </div>
 
@@ -111,70 +126,26 @@ function Profile({ userId }) { // Assuming userId is passed as a prop
             />
           </div>
 
+          {/* Profile Picture Upload */}
           <div className="flex items-center gap-4">
-            <label className="text-lg w-1/3">Jenis Kelamin</label>
-            <div className="flex gap-2">
-              <input
-                type="radio"
-                name="gender"
-                value="L"
-                checked={profileData.gender === 'L'}
-                onChange={() => setProfileData({ ...profileData, gender: 'L' })}
-                disabled={!isEditable}
-              />
-              <label>Laki-laki</label>
-              <input
-                type="radio"
-                name="gender"
-                value="P"
-                checked={profileData.gender === 'P'}
-                onChange={() => setProfileData({ ...profileData, gender: 'P' })}
-                disabled={!isEditable}
-              />
-              <label>Perempuan</label>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <label className="text-lg w-1/3">Tanggal Lahir</label>
-            <input
-              type="date"
-              className="input input-bordered w-2/3"
-              value={profileData.birthDate}
-              onChange={(e) => setProfileData({ ...profileData, birthDate: e.target.value })}
-              disabled={!isEditable}
-            />
-          </div>
-
-          <div className="flex items-center gap-4">
-            <label className="text-lg w-1/3">Alamat</label>
-            <input
-              type="text"
-              className="input input-bordered w-2/3"
-              value={profileData.address}
-              onChange={(e) => setProfileData({ ...profileData, address: e.target.value })}
-              disabled={!isEditable}
-            />
-          </div>
-
-          <div className="flex items-center gap-4">
-            <label className="text-lg w-1/3">Foto Profile</label>
+            <label className="text-lg w-1/3">Profile Picture</label>
             <input
               type="file"
-              className="file-input file-input-bordered w-2/3"
+              className="input input-bordered w-2/3"
               onChange={handleFileChange}
               disabled={!isEditable}
             />
           </div>
-
-          <div className="mt-6">
+          
+          {/* Edit and Save Buttons */}
+          <div className="flex gap-4 mt-4">
             {isEditable ? (
-              <button className="btn btn-primary w-full" onClick={handleSaveClick}>
-                SIMPAN
+              <button onClick={handleSaveClick} className="btn btn-primary">
+                Save
               </button>
             ) : (
-              <button className="btn btn-secondary w-full" onClick={handleEditClick}>
-                EDIT
+              <button onClick={handleEditClick} className="btn btn-secondary">
+                Edit
               </button>
             )}
           </div>

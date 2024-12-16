@@ -377,6 +377,44 @@ const updateUser = async (req, res) => {
     });
   }
 };
+// Get user by ID
+const getUserById = async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    // Retrieve the user by ID from the database
+    const [rows] = await dbpool.execute("SELECT * FROM users WHERE id = ?", [userId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        message: "USER NOT FOUND",
+        error: "User with the provided ID does not exist.",
+      });
+    }
+
+    const user = rows[0];
+
+    // Return the user data
+    res.status(200).json({
+      message: "USER FOUND",
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        avatar: user.avatar,
+        role: user.role,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "GET USER BY ID FAILED",
+      error: error.message || error,
+    });
+  }
+};
 module.exports = {
   getAllUsers,
   createNewUser,
@@ -387,4 +425,5 @@ module.exports = {
   getResetPasswordPage,
   verifyOTP,
   updateUser,
+  getUserById
 };

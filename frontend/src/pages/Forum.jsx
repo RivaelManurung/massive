@@ -5,33 +5,107 @@ import { Link, useNavigate } from "react-router-dom";
 const Forum = () => {
   const [discussions, setDiscussions] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const navigate = useNavigate(); // Initialize useNavigate for navigation
+  const [currentPage, setCurrentPage] = useState(1);
+  const [discussionsPerPage] = useState(10);
+  const [users, setUsers] = useState([]); // Menyimpan data pengguna
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDiscussions = async () => {
       try {
         const response = await axios.get("http://localhost:4000/forum");
-        console.log(response.data); // Cek data yang diterima
         setDiscussions(response.data);
       } catch (error) {
         console.error("Error fetching discussions:", error);
       }
     };
 
+    const fetchUsers = async () => {
+      try {
+        const token = localStorage.getItem("token"); // atau dari tempat Anda menyimpan token
+
+        const response = await axios.get("http://localhost:4000/users", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        // Missing code to set users state
+        setUsers(response.data);  // Add this line to store users in state
+        
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
     fetchDiscussions();
+    fetchUsers();
   }, []);
 
-  const filteredDiscussions = discussions.filter((discussion) =>
-    discussion.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredDiscussions = discussions.filter((discussion) => {
+    const titleMatch = discussion.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    const keywordsMatch =
+      discussion.keywords &&
+      Array.isArray(discussion.keywords) &&
+      discussion.keywords.some((keyword) =>
+        keyword.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+    return titleMatch || keywordsMatch;
+  });
+
+  const indexOfLastDiscussion = currentPage * discussionsPerPage;
+  const indexOfFirstDiscussion = indexOfLastDiscussion - discussionsPerPage;
+  const currentDiscussions = filteredDiscussions.slice(
+    indexOfFirstDiscussion,
+    indexOfLastDiscussion
   );
 
+  const handleNextPage = () => {
+    if (
+      currentPage < Math.ceil(filteredDiscussions.length / discussionsPerPage)
+    ) {
+      setCurrentPage((prevPage) => prevPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prevPage) => prevPage - 1);
+    }
+  };
+
+  const totalPages = Math.ceil(filteredDiscussions.length / discussionsPerPage);
+
   const handleReplyClick = (id) => {
-    navigate(`/reply/${id}`); // Navigate to the reply page for the discussion
+    navigate(`/reply/${id}`);
+  };
+
+  // Fungsi untuk memformat tanggal
+  const formatDate = (dateString) => {
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: false,
+    };
+    const date = new Date(dateString);
+    return date.toLocaleString("id-ID", options); // Format tanggal sesuai lokal Indonesia
+  };
+
+  // Menemukan nama pengguna berdasarkan ID
+  const getUserNameById = (userId) => {
+    const user = users.find((user) => user.id === userId); // mencari user berdasarkan ID
+    return user ? user.name : "Unknown"; // mengambil 'name' dan mengembalikan 'Unknown' jika tidak ditemukan
   };
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen flex flex-col items-center">
-      {/* Title Section */}
       <div
         style={{ backgroundColor: "#09734C" }}
         className="w-full text-white text-center py-12 rounded-md mb-4 min-h-[200px]"
@@ -47,10 +121,9 @@ const Forum = () => {
         </p>
       </div>
 
-      {/* New Discussion Button and Search Bar */}
       <div className="w-full max-w-4xl flex justify-between items-center mb-6">
         <button className="bg-[#055941] hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-md">
-          <Link to="/diskusi.jsx" className="text-white">
+          <Link to="/AddForum" className="text-white">
             Buat Diskusi Baru
           </Link>
         </button>
@@ -71,24 +144,20 @@ const Forum = () => {
             </span>
             <input
               type="text"
-              placeholder="Cari judul diskusi..."
+              placeholder="Cari judul atau keyword..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="border border-gray-300 rounded-md pl-10 px-4 py-2 w-80 bg-[#F3F3F3] placeholder-black"
             />
           </div>
-          <button className="bg-[#055941] text-white font-semibold px-4 py-2 rounded-md">
-            Cari
-          </button>
         </div>
       </div>
 
-      {/* Discussion Cards */}
       <div className="w-full max-w-4xl space-y-4">
-        {filteredDiscussions.length === 0 ? (
+        {currentDiscussions.length === 0 ? (
           <p className="text-gray-700">Tidak ada diskusi yang ditemukan.</p>
         ) : (
-          filteredDiscussions.map((discussion) => (
+          currentDiscussions.map((discussion) => (
             <div
               key={discussion.id}
               className="bg-white p-4 rounded-md shadow-md border border-gray-200"
@@ -104,11 +173,13 @@ const Forum = () => {
                   </svg>
                 </span>
                 <p className="text-gray-700 text-lg font-bold">
-                  {discussion.userName}
+                  {getUserNameById(discussion.userId)}{" "}
+                  {/* Menampilkan nama pembuat */}
                 </p>
                 <span className="text-gray-500">•</span>
                 <p className="text-sm text-gray-500 font-semibold">
-                  {discussion.createdAt}
+                  {formatDate(discussion.createdAt)}{" "}
+                  {/* Menampilkan tanggal yang diformat */}
                 </p>
               </div>
               <h2 className="text-lg font-bold text-black">
@@ -116,7 +187,6 @@ const Forum = () => {
               </h2>
               <p className="text-black mt-2 mb-4">{discussion.content}</p>
 
-              {/* Display Keywords */}
               {discussion.keywords &&
               Array.isArray(discussion.keywords) &&
               discussion.keywords.length > 0 ? (
@@ -144,7 +214,7 @@ const Forum = () => {
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path d="M4 4h16v16H4V4zm0-2c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2H4zm3 10h8v2H7v-2zm0-4h8v2H7V8z" />
+                    <path d="M4 4h16v16H4V4zm0-2c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2H4zm8 12h2v2h-2zm-4 0h2v2H8z" />
                   </svg>
                   Balas
                 </Link>
@@ -152,6 +222,23 @@ const Forum = () => {
             </div>
           ))
         )}
+      </div>
+
+      <div className="flex justify-center mt-8 space-x-4">
+        <button
+          className="bg-gray-200 text-black px-4 py-2 rounded-md"
+          onClick={handlePreviousPage}
+          disabled={currentPage === 1}
+        >
+          Sebelumnya
+        </button>
+        <button
+          className="bg-gray-200 text-black px-4 py-2 rounded-md"
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages}
+        >
+          Berikutnya
+        </button>
       </div>
     </div>
   );

@@ -20,11 +20,16 @@ const forumController = require("../controller/forumController");
 router.post("/register", userController.createNewUser);
 router.post("/login", userController.loginUser);
 router.post("/logout", userController.logoutUser);
-router.get("/getAllUser", authenticateJWT, userController.getAllUsers);
+router.get("/users", authenticateJWT, userController.getAllUsers); // Changed to '/users'
 router.post("/forgot-password", userController.forgotPassword);
 router.post("/reset-password", userController.resetPassword);
 router.get("/reset-password/verify/:otp", userController.verifyOTP);
 router.put("/update-user/:id", userController.updateUser);
+router.get("/users/:id", authenticateJWT, userController.getUserById); // Changed to '/users'
+
+
+// Di routes Anda, tambahkan endpoint '/users'
+
 
 // --- CATEGORY ARTIKEL ROUTES ---
 router.get("/categoryArtikel", categoryArtikelController.getAllCategoryArtikel);
@@ -116,8 +121,18 @@ router.post(
     videoTutorialController.createNewVideoTutorial(req, res);
   }
 );
-router.put("/videoTutorial/:id", videoTutorialController.updateVideoTutorial);
-router.delete("/videoTutorial/:id", videoTutorialController.deleteVideoTutorial)
+router.put(
+  "/videoTutorial/:id",
+  upload.fields([
+    { name: "videoUrl", maxCount: 1 },
+    { name: "thumbnailUrl", maxCount: 1 },
+  ]),
+  videoTutorialController.updateVideoTutorial
+);
+router.delete(
+  "/videoTutorial/:id",
+  videoTutorialController.deleteVideoTutorial
+);
 // Uncomment for future implementation of update/delete routes
 // router.put("/videoTutorial/:id", authenticateJWT, adminMiddleware, videoTutorialController.updateVideoTutorial);
 // router.delete("/videoTutorial/:id", authenticateJWT, adminMiddleware, videoTutorialController.deleteVideoTutorial);
@@ -131,6 +146,24 @@ router.post(
   upload.single("imageUrl"), // Memastikan 'imageUrl' untuk upload gambar forum
   forumController.createNewForum
 );
+// --- REPLY ROUTES ---
+router.get("/replies/:forumId", forumController.getAllRepliesByForumId); // Mendapatkan semua balasan untuk forum tertentu
+router.post(
+  "/replies/:forumId",
+  authenticateJWT, // Hanya pengguna yang terautentikasi yang dapat membalas
+  forumController.addReplyToForum // Menambahkan balasan ke forum tertentu
+);
+router.put(
+  "/replies/:replyId",
+  authenticateJWT, // Hanya pengguna yang terautentikasi yang dapat mengedit balasannya
+  forumController.updateReply // Mengedit balasan berdasarkan ID balasan
+);
+router.delete(
+  "/replies/:replyId",
+  authenticateJWT, // Hanya pengguna yang terautentikasi yang dapat menghapus balasannya
+  forumController.deleteReply // Menghapus balasan berdasarkan ID balasan
+);
+
 // Uncomment for future implementation of update/delete routes
 // router.put("/forum/:id", authenticateJWT, adminMiddleware, forumController.updateForum);
 // router.delete("/forum/:id", authenticateJWT, adminMiddleware, forumController.deleteForum);

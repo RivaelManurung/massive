@@ -42,155 +42,181 @@ ensureTablesExist();
 
 // --- Get All Forums ---
 const getAllForums = async (req, res) => {
-    try {
-      const SQLQuery = "SELECT * FROM forum";
-      const [rows] = await dbpool.execute(SQLQuery);
-  
-      const forums = rows.map((row) => {
-        let keywords = [];
-        try {
-          keywords = row.keywords ? JSON.parse(row.keywords) : [];
-        } catch (error) {
-          console.error(`Error parsing keywords for forum ID ${row.id}:`, error);
-          keywords = [];  // Default to an empty array if JSON parsing fails
-        }
-      
-        return {
-          id: row.id,
-          title: row.title,
-          content: row.content,
-          userId: row.userId,
-          keywords,
-          imageUrl: row.imageUrl,
-          createdAt: row.created_at,
-          updatedAt: row.updated_at,
-        };
-      });
-      
-  
-      res.json(forums);
-    } catch (error) {
-      console.error('Error retrieving forums:', error);
-      res.status(500).json({
-        message: "Failed to retrieve forums",
-        serverMessage: error.message,
-      });
-    }
-  };
-  
+  try {
+    const SQLQuery = "SELECT * FROM forum";
+    const [rows] = await dbpool.execute(SQLQuery);
 
-  const getForumById = async (req, res) => {
-    const { id } = req.params;
-    try {
-      const forumQuery = "SELECT * FROM forum WHERE id = ?";
-      const repliesQuery = "SELECT * FROM replies WHERE forumId = ?";
-  
-      const [forumRows] = await dbpool.execute(forumQuery, [id]);
-      const [replyRows] = await dbpool.execute(repliesQuery, [id]);1
-  
-      if (forumRows.length === 0) {
-        return res.status(404).json({ message: "Forum not found" });
+    const forums = rows.map((row) => {
+      let keywords = [];
+      try {
+        const rawKeywords = row.keywords;
+
+        // Pastikan rawKeywords adalah string dan bukan null
+        if (typeof rawKeywords === "string" && rawKeywords.trim()) {
+          keywords = JSON.parse(rawKeywords); // Parsing JSON jika valid
+        } else if (Array.isArray(rawKeywords)) {
+          // Jika sudah berbentuk array, langsung gunakan
+          keywords = rawKeywords;
+        }
+      } catch (parseError) {
+        console.error("Error parsing keywords:", parseError);
+        keywords = []; // Fallback ke array kosong jika terjadi error
       }
-  
-      const forum = {
-        id: forumRows[0].id,
-        title: forumRows[0].title,
-        content: forumRows[0].content,
-        userId: forumRows[0].userId,
-        keywords: JSON.parse(forumRows[0].keywords || "[]"),
-        imageUrl: forumRows[0].imageUrl,
-        createdAt: forumRows[0].created_at,
-        updatedAt: forumRows[0].updated_at,
-        replies: replyRows.map((reply) => ({
-          id: reply.id,
-          forumId: reply.forumId,
-          userId: reply.userId,
-          content: reply.content,
-          createdAt: reply.created_at,
-          updatedAt: reply.updated_at,
-        })),
+
+      return {
+        id: row.id,
+        title: row.title,
+        content: row.content,
+        userId: row.userId,
+        keywords: keywords,
+        imageUrl: row.imageUrl,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
       };
-  
-      res.json(forum);
-    } catch (error) {
-        console.error("Error fetching forum:", error); // Log error details
-        res.status(500).json({
-          message: "Failed to retrieve forum",
-          serverMessage: error.message, // Provide more detailed error message
-        });
+    });
+
+    res.json(forums);
+  } catch (error) {
+    console.error("Error retrieving forums:", error);
+    res.status(500).json({
+      message: "Failed to retrieve forums",
+      serverMessage: error.message,
+    });
+  }
+};
+
+
+const getForumById = async (req, res) => {
+  const { id } = req.params;
+  if (!id || isNaN(id)) {
+    return res.status(400).json({ message: "Invalid ID format" });
+  }
+
+  try {
+    const forumQuery = "SELECT * FROM forum WHERE id = ?";
+    const repliesQuery = "SELECT * FROM replies WHERE forumId = ?";
+
+    const [forumRows] = await dbpool.execute(forumQuery, [id]);
+    const [replyRows] = await dbpool.execute(repliesQuery, [id]);
+
+    if (forumRows.length === 0) {
+      return res.status(404).json({ message: "Forum not found" });
+    }
+
+    let keywords = [];
+    try {
+      const rawKeywords = forumRows[0].keywords;
+
+      // Pastikan rawKeywords adalah string dan bukan null
+      if (typeof rawKeywords === "string" && rawKeywords.trim()) {
+        keywords = JSON.parse(rawKeywords); // Parsing JSON jika valid
+      } else if (Array.isArray(rawKeywords)) {
+        // Jika sudah berbentuk array, langsung gunakan
+        keywords = rawKeywords;
       }
-  };
-  
+    } catch (parseError) {
+      console.error("Error parsing keywords:", parseError);
+      keywords = []; // Fallback ke array kosong jika terjadi error
+    }
+
+    const forum = {
+      id: forumRows[0].id,
+      title: forumRows[0].title,
+      content: forumRows[0].content,
+      userId: forumRows[0].userId,
+      keywords: keywords,
+      imageUrl: forumRows[0].imageUrl,
+      createdAt: forumRows[0].created_at,
+      updatedAt: forumRows[0].updated_at,
+      replies: replyRows.map((reply) => ({
+        id: reply.id,
+        forumId: reply.forumId,
+        userId: reply.userId,
+        content: reply.content,
+        createdAt: reply.created_at,
+        updatedAt: reply.updated_at,
+      })),
+    };
+
+    console.log("Returning forum data:", forum);
+    res.json(forum);
+  } catch (error) {
+    console.error("Error fetching forum:", error);
+    res.status(500).json({
+      message: "Failed to retrieve forum",
+      serverMessage: error.message,
+    });
+  }
+};
 
 // --- Create a New Forum ---
 const createNewForum = async (req, res) => {
-    const { title, content, keywords } = req.body;
-    const userId = req.user.id;  // Ensure `req.user` is being set properly via authentication
-    const imageUrl = req.file ? `/uploads/images/${req.file.filename}` : null;
-  
-    if (!title || !content || !userId) {
-      return res.status(400).json({
-        message: "Fields 'title', 'content', and 'userId' are required.",
-      });
-    }
-  
-    if (title.length > 255 || content.length > 10000) {
-      return res.status(400).json({
-        message: "Title or content exceeds the maximum allowed length.",
-      });
-    }
-  
-    if (keywords && keywords.length > 3) {
-      return res.status(400).json({
-        message: "Keywords should not exceed 3.",
-      });
-    }
-  
-    try {
-      const SQLQuery = `
+  const { title, content, keywords } = req.body;
+  const userId = req.user.id; 
+  const imageUrl = req.file ? `/uploads/images/${req.file.filename}` : null;
+
+  if (!title || !content || !userId) {
+    return res.status(400).json({
+      message: "Fields 'title', 'content', and 'userId' are required.",
+    });
+  }
+
+  if (title.length > 255 || content.length > 10000) {
+    return res.status(400).json({
+      message: "Title or content exceeds the maximum allowed length.",
+    });
+  }
+
+  if (keywords && keywords.length > 3) {
+    return res.status(400).json({
+      message: "Keywords should not exceed 3.",
+    });
+  }
+
+  try {
+    const SQLQuery = `
         INSERT INTO forum (title, content, userId, keywords, imageUrl, created_at, updated_at)
         VALUES (?, ?, ?, ?, ?, NOW(), NOW())
       `;
-      const [result] = await dbpool.execute(SQLQuery, [
-        title,
-        content,
-        userId,
-        JSON.stringify(keywords || []),
-        imageUrl,
-      ]);
-  
-      const newForum = new Forum(
-        result.insertId,
-        title,
-        content,
-        userId,
-        keywords || [],
-        imageUrl,
-        new Date(),
-        new Date()
-      );
-  
-      res.json({
-        message: "Forum created successfully.",
-        forum: newForum,
-      });
-    } catch (error) {
-      console.error("Error creating forum:", error);
-      res.status(500).json({
-        message: "Failed to create forum.",
-        serverMessage: error.message,
-      });
-    }
-  };
-  
-  
+    const [result] = await dbpool.execute(SQLQuery, [
+      title,
+      content,
+      userId,
+      JSON.stringify(keywords || []),
+      imageUrl,
+    ]);
+
+    const newForum = new Forum(
+      result.insertId,
+      title,
+      content,
+      userId,
+      keywords || [],
+      imageUrl,
+      new Date(),
+      new Date()
+    );
+
+    res.json({
+      message: "Forum created successfully.",
+      forum: newForum,
+    });
+  } catch (error) {
+    console.error("Error creating forum:", error);
+    res.status(500).json({
+      message: "Failed to create forum.",
+      serverMessage: error.message,
+    });
+  }
+};
 
 // --- Add Reply to Forum ---
 const addReplyToForum = async (req, res) => {
   const { forumId } = req.params;
-  const { userId, content } = req.body;
+  const { content } = req.body;
 
-  if (!content || !userId) {
+  // Ensure content is provided
+  if (!content || !req.user.id) {
     return res.status(400).json({
       message: "Fields 'content' and 'userId' are required.",
     });
@@ -201,12 +227,16 @@ const addReplyToForum = async (req, res) => {
       INSERT INTO replies (forumId, userId, content, created_at, updated_at)
       VALUES (?, ?, ?, NOW(), NOW())
     `;
-    const [result] = await dbpool.execute(SQLQuery, [forumId, userId, content]);
+    const [result] = await dbpool.execute(SQLQuery, [
+      forumId,
+      req.user.id,
+      content,
+    ]);
 
     const newReply = new Reply(
       result.insertId,
       forumId,
-      userId,
+      req.user.id,
       content,
       new Date(),
       new Date()
@@ -224,10 +254,91 @@ const addReplyToForum = async (req, res) => {
   }
 };
 
+const getAllRepliesByForumId = async (req, res) => {
+  const { forumId } = req.params;
+  try {
+    const SQLQuery = "SELECT * FROM replies WHERE forumId = ?";
+    const [rows] = await dbpool.execute(SQLQuery, [forumId]);
+
+    const replies = rows.map((reply) => ({
+      id: reply.id,
+      forumId: reply.forumId,
+      userId: reply.userId,
+      content: reply.content,
+      createdAt: reply.created_at,
+      updatedAt: reply.updated_at,
+    }));
+
+    res.json(replies);
+  } catch (error) {
+    console.error("Error fetching replies:", error);
+    res.status(500).json({
+      message: "Failed to retrieve replies.",
+      serverMessage: error.message,
+    });
+  }
+};
+
+const updateReply = async (req, res) => {
+  const { replyId } = req.params;
+  const { content } = req.body;
+
+  if (!content) {
+    return res.status(400).json({
+      message: "Field 'content' is required.",
+    });
+  }
+
+  try {
+    const SQLQuery =
+      "UPDATE replies SET content = ?, updated_at = NOW() WHERE id = ?";
+    const [result] = await dbpool.execute(SQLQuery, [content, replyId]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Reply not found." });
+    }
+
+    res.json({
+      message: "Reply updated successfully.",
+      updatedReply: { id: replyId, content },
+    });
+  } catch (error) {
+    console.error("Error updating reply:", error);
+    res.status(500).json({
+      message: "Failed to update reply.",
+      serverMessage: error.message,
+    });
+  }
+};
+
+const deleteReply = async (req, res) => {
+  const { replyId } = req.params;
+
+  try {
+    const SQLQuery = "DELETE FROM replies WHERE id = ?";
+    const [result] = await dbpool.execute(SQLQuery, [replyId]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Reply not found." });
+    }
+
+    res.json({ message: "Reply deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting reply:", error);
+    res.status(500).json({
+      message: "Failed to delete reply.",
+      serverMessage: error.message,
+    });
+  }
+};
+
 // --- Export Controllers ---
 module.exports = {
   getAllForums,
   getForumById,
   createNewForum,
   addReplyToForum,
+  getAllRepliesByForumId,
+  updateReply,
+  deleteReply,
 };

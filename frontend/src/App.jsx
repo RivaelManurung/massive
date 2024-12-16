@@ -26,6 +26,7 @@ import WeatherCard from "./pages/WeatherCard";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Reply from "./pages/ForumReply";
+import AddForum from "./pages/AddFroum";
 
 
 function App() {
@@ -83,9 +84,11 @@ function App() {
               <Route path="/article/:id" element={<ArticleDetail />} />
               <Route path="/videos" element={<Videos />} />
               <Route path="/video/:id" element={<VideoDetail />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/:userId" element={<Profile />} />
               <Route path="/cuaca" element={<WeatherCard />} />
               <Route path="/forum/:id/reply"  element={<Reply />}/>
+              <Route path="/AddForum"  element={<AddForum />}/>
+
 
               <Route
                 path="/forum"
