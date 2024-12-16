@@ -53,15 +53,22 @@ const CreateVideo = () => {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await axios.post("http://localhost:4000/videoTutorial", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.post(
+        "http://localhost:4000/videoTutorial",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       // Show success notification
-      setNotification({ message: "Video berhasil ditambahkan!", type: "success" });
+      setNotification({
+        message: "Video berhasil ditambahkan!",
+        type: "success",
+      });
       setTimeout(() => {
         setNotification(null);
         navigate("/admin/videos"); // Redirect after successful creation
@@ -70,7 +77,10 @@ const CreateVideo = () => {
       console.error("Failed to create video:", error);
       if (error.response) {
         console.error("Server responded with:", error.response.data);
-        setNotification({ message: error.response.data.message, type: "error" });
+        setNotification({
+          message: error.response.data.message,
+          type: "error",
+        });
         setTimeout(() => setNotification(null), 3000);
       }
     }
@@ -87,11 +97,14 @@ const CreateVideo = () => {
           {notification.message}
         </div>
       )}
-      <div className="w-full max-w-screen-lg bg-[#055941] text-white p-4 rounded-xl flex items-center">
+      <div className="w-full max-w-screen-lg bg-[#055941] text-white p-4 rounded-xl mx-auto">
         <h2 className="text-xl font-semibold">Tambah Video</h2>
       </div>
 
-      <form onSubmit={handleCreate} className="mt-5">
+      <form
+        onSubmit={handleCreate}
+        className="mt-5 bg-white p-6 rounded-xl shadow-md"
+      >
         {/* Title Input */}
         <input
           type="text"
@@ -103,7 +116,10 @@ const CreateVideo = () => {
 
         {/* Category Selection */}
         <div className="mb-5">
-          <label htmlFor="category" className="block text-sm font-semibold mb-2">
+          <label
+            htmlFor="category"
+            className="block text-sm font-semibold mb-2"
+          >
             Pilih Kategori
           </label>
           <select
@@ -131,7 +147,10 @@ const CreateVideo = () => {
 
         {/* Video Upload */}
         <div className="mb-5">
-          <label htmlFor="videoUrl" className="block text-sm font-semibold mb-2">
+          <label
+            htmlFor="videoUrl"
+            className="block text-sm font-semibold mb-2"
+          >
             Upload Video
           </label>
           <input
@@ -145,7 +164,10 @@ const CreateVideo = () => {
 
         {/* Thumbnail Upload */}
         <div className="mb-5">
-          <label htmlFor="thumbnailUrl" className="block text-sm font-semibold mb-2">
+          <label
+            htmlFor="thumbnailUrl"
+            className="block text-sm font-semibold mb-2"
+          >
             Upload Thumbnail
           </label>
           <input
@@ -158,9 +180,11 @@ const CreateVideo = () => {
         </div>
 
         {/* Submit Button */}
-        <button type="submit" className="btn bg-[#055941] text-white w-40 mx-auto">
-          Tambah Video
-        </button>
+        <div className="flex justify-center mt-6">
+          <button type="submit" className="btn bg-[#055941] text-white w-40">
+            Tambah Video
+          </button>
+        </div>
       </form>
     </div>
   );

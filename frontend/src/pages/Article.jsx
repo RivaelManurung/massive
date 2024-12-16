@@ -7,7 +7,7 @@ import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 const ARTICLES_API_URL = "http://localhost:4000/artikel";
 const CATEGORIES_API_URL = "http://localhost:4000/categoryArtikel";
 
-const itemsPerPage = 10;
+const itemsPerPage = 5;
 
 const BlogPage = () => {
   const navigate = useNavigate();
@@ -44,7 +44,6 @@ const BlogPage = () => {
     const matchesSearch = title.includes(searchTerm.toLowerCase().trim());
     return matchesSearch && (selectedCategory === "Semua" || article.categoryArtikelId === selectedCategory);
   });
-  
 
   const totalPages = Math.ceil(filteredArticles.length / itemsPerPage);
   const currentArticles = filteredArticles.slice(
@@ -57,7 +56,9 @@ const BlogPage = () => {
   };
 
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
   };
 
   const handleCategoryChange = (category) => {

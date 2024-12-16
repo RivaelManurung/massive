@@ -18,6 +18,7 @@ import AdminVideos from "./pages/admin/AdminVideos";
 import CreateVideo from './pages/admin/Videos/CreateVideos';
 import EditVideo from './pages/admin/Videos/EditVideos';
 import AdminForum from "./pages/admin/AdminForum";
+import EditForum from "./pages/admin/Forum/EditForum";
 import LoginPage from "./pages/Auth/Login";
 import RegisterPage from "./pages/Auth/Register";
 import Profile from "./pages/Profile";
@@ -63,6 +64,7 @@ function App() {
                 <Route path="/edit-videos/:id" element={<EditVideo />} />
                 <Route path="/admin/forum" element={<AdminForum />} />
                 <Route path="/" element={<Navigate to="/admin" />} />
+\                <Route path="/edit-forum/:id" element={<EditForum />} />
               </Routes>
             </div>
             <AdminFooter />

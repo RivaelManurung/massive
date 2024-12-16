@@ -14,32 +14,35 @@ const Forum = () => {
     const fetchDiscussions = async () => {
       try {
         const response = await axios.get("http://localhost:4000/forum");
-        setDiscussions(response.data);
+        const sortedDiscussions = response.data.sort((a, b) => {
+          // Sort by createdAt in descending order (latest first)
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+        setDiscussions(sortedDiscussions);
       } catch (error) {
         console.error("Error fetching discussions:", error);
       }
     };
-
+  
     const fetchUsers = async () => {
       try {
-        const token = localStorage.getItem("token"); // atau dari tempat Anda menyimpan token
-
+        const token = localStorage.getItem("token"); // or wherever you store your token
+  
         const response = await axios.get("http://localhost:4000/users", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        // Missing code to set users state
-        setUsers(response.data);  // Add this line to store users in state
-        
+        setUsers(response.data);
       } catch (error) {
         console.error("Error fetching users:", error);
       }
     };
-
+  
     fetchDiscussions();
     fetchUsers();
   }, []);
+  
 
   const filteredDiscussions = discussions.filter((discussion) => {
     const titleMatch = discussion.title

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   FaBars,
@@ -11,7 +11,7 @@ import {
 } from "react-icons/fa";
 import { useUser } from "./UserContext";
 
-const LoginModal = ({ onClose }) => (
+const LoginModal = () => (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
     <div className="bg-white p-6 rounded-lg shadow-xl">
       <h2 className="text-2xl font-semibold text-gray-800 mb-4">
@@ -20,14 +20,6 @@ const LoginModal = ({ onClose }) => (
       <p className="text-gray-600 mb-4">
         Anda perlu login untuk mengakses Forum.
       </p>
-      <div className="flex justify-end space-x-4">
-        <button onClick={onClose} className="btn btn-ghost">
-          Tutup
-        </button>
-        <Link to="/login" className="btn btn-primary">
-          Ke Login
-        </Link>
-      </div>
     </div>
   </div>
 );
@@ -47,14 +39,34 @@ const UserNavbar = ({ isLoggedIn, setIsLoggedIn }) => {
   };
 
   const handleForumClick = () => {
-    if (!isLoggedIn) setIsModalOpen(true);
-    else navigate("/forum");
+    if (!isLoggedIn) {
+      setIsModalOpen(true);
+      // Redirect to login after 3 seconds
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+    } else {
+      navigate("/forum");
+    }
   };
 
   const isActive = (path) =>
     location.pathname === path
       ? "bg-lime-600 text-white"
       : "text-gray-300 hover:text-white";
+
+  useEffect(() => {
+    if (isModalOpen) {
+      // Hide modal after 3 seconds
+      const timer = setTimeout(() => {
+        setIsModalOpen(false);
+        navigate("/login");
+      }, 2000);
+
+      // Cleanup the timer if the component is unmounted
+      return () => clearTimeout(timer);
+    }
+  }, [isModalOpen, navigate]);
 
   return (
     <>
@@ -228,7 +240,7 @@ const UserNavbar = ({ isLoggedIn, setIsLoggedIn }) => {
         )}
       </nav>
 
-      {isModalOpen && <LoginModal onClose={() => setIsModalOpen(false)} />}
+      {isModalOpen && <LoginModal />}
     </>
   );
 };

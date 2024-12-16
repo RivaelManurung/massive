@@ -163,6 +163,12 @@ router.delete(
   authenticateJWT, // Hanya pengguna yang terautentikasi yang dapat menghapus balasannya
   forumController.deleteReply // Menghapus balasan berdasarkan ID balasan
 );
+router.put("/forum/:id",  authenticateJWT,
+  adminMiddleware, forumController.editForum);
+
+// Route untuk menghapus reply
+router.delete("/reply/:replyId",  authenticateJWT,
+  adminMiddleware, forumController.deleteReplyByAdmin);
 
 // Uncomment for future implementation of update/delete routes
 // router.put("/forum/:id", authenticateJWT, adminMiddleware, forumController.updateForum);

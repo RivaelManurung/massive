@@ -25,31 +25,44 @@ const AddForum = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (keywords.length > 3) {
       setError("You can only add up to 3 keywords.");
       return;
     }
-
+  
+    const sanitizedKeywords = keywords.map((kw) => kw.trim()).filter((kw) => kw !== "");
+  
     const formData = new FormData();
     formData.append("title", title);
     formData.append("content", content);
-    formData.append("keywords", JSON.stringify(keywords));
+    formData.append("keywords", sanitizedKeywords.join(",")); // Adjust based on backend requirements
     if (image) formData.append("image", image);
-
+  
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Authentication token is missing. Please log in.");
+        return;
+      }
+  
+      console.log("Form Data:");
+      for (const pair of formData.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+      }
+  
       const response = await axios.post(
-        "http://localhost:4000/forums",
+        "http://localhost:4000/forum",
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
           },
         }
       );
-
+  
       alert("Forum created successfully!");
-      navigate(`/forum/${response.data.forum.id}`);
+      navigate(`/forum}`);
     } catch (error) {
       console.error("Error creating forum:", error);
       setError(
@@ -57,6 +70,8 @@ const AddForum = () => {
       );
     }
   };
+  
+  
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen flex flex-col items-center">

@@ -100,7 +100,7 @@ function LoginPage({ setIsLoggedIn, setIsAdmin }) {
                 className="mr-2"
               />
               <label htmlFor="showPassword" className="text-sm text-gray-600">
-                Tampilkan Password
+                Tampilkan Kata Sandi
               </label>
             </div>
 

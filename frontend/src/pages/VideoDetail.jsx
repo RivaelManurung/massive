@@ -21,7 +21,9 @@ const VideoDetail = () => {
   useEffect(() => {
     const fetchVideoDetail = async () => {
       try {
-        const response = await axios.get(`http://localhost:4000/videoTutorial/${id}`);
+        const response = await axios.get(
+          `http://localhost:4000/videoTutorial/${id}`
+        );
         setVideo(response.data);
       } catch (error) {
         console.error("Error fetching video detail:", error);
@@ -77,9 +79,12 @@ const VideoDetail = () => {
   return (
     <div className="p-8 max-w-screen-lg mx-auto">
       {/* Video Detail */}
-      <h1 className="text-4xl font-bold mb-4 text-black">{video.title || "No Title"}</h1>
+      <h1 className="text-4xl font-bold mb-4 text-black">
+        {video.title || "No Title"}
+      </h1>
       <div className="text-gray-600 text-sm mb-6">
-        Published on: {video.createdAt ? formatDate(video.createdAt) : "Unknown Date"} |
+        Published on:{" "}
+        {video.createdAt ? formatDate(video.createdAt) : "Unknown Date"} |
         Category:{" "}
         <span className="font-semibold">
           {getCategoryName(video.categoryVideoId)}
@@ -106,19 +111,28 @@ const VideoDetail = () => {
       </div>
 
       {/* Video Description */}
-      <p className="text-lg font-semibold mb-4 text-black">
-        {video.description || "No description available"}
-      </p>
+      <div
+        className="text-lg mb-4 text-black"
+        dangerouslySetInnerHTML={{
+          __html: video.description || "No description available",
+        }}
+      ></div>
 
       {/* Latest Videos Section */}
       <div className="mt-12">
-        <h2 className="text-2xl font-semibold mb-4 text-black">Latest Videos</h2>
+        <h2 className="text-2xl font-semibold mb-4 text-black">
+          Latest Videos
+        </h2>
         <div className="flex overflow-x-auto gap-8">
           {latestVideos.slice(0, 5).map((latestVideo) => (
             <div
               key={latestVideo.id}
               className="card shadow-md transition-transform transform hover:scale-105 cursor-pointer"
-              style={{ backgroundColor: "white", color: "black", minWidth: "250px" }}
+              style={{
+                backgroundColor: "white",
+                color: "black",
+                minWidth: "250px",
+              }}
               onClick={() => handleVideoClick(latestVideo.id)}
             >
               <figure className="relative">
@@ -133,8 +147,12 @@ const VideoDetail = () => {
                 </div>
               </figure>
               <div className="card-body p-4">
-                <h3 className="text-xl font-semibold text-black">{latestVideo.title}</h3>
-                <p className="text-sm text-gray-500">{formatDate(latestVideo.createdAt)}</p>
+                <h3 className="text-xl font-semibold text-black">
+                  {latestVideo.title}
+                </h3>
+                <p className="text-sm text-gray-500">
+                  {formatDate(latestVideo.createdAt)}
+                </p>
                 <p className="text-black mt-2">
                   {latestVideo.description?.slice(0, 100)}...
                 </p>

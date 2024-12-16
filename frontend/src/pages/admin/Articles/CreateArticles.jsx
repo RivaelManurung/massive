@@ -68,7 +68,7 @@ const CreateArticle = () => {
 
   return (
     <div className="p-5 font-sans">
-      <div className="w-full max-w-screen-lg bg-[#055941] text-white p-4 rounded-xl flex items-center">
+      <div className="w-full max-w-screen-lg bg-[#055941] text-white p-4 rounded-xl mx-auto">
         <h2 className="text-xl font-semibold">Tambah Artikel</h2>
       </div>
 

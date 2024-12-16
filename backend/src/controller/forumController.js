@@ -331,6 +331,116 @@ const deleteReply = async (req, res) => {
     });
   }
 };
+const editForum = async (req, res) => {
+  const { id } = req.params; // Forum ID
+  const { title, content, keywords } = req.body; // Data baru untuk forum
+
+  if (!title || !content) {
+    return res.status(400).json({
+      message: "Fields 'title' and 'content' are required.",
+    });
+  }
+
+  try {
+    // Update Forum
+    const updateForumQuery = `
+      UPDATE forum
+      SET title = ?, content = ?, keywords = ?, updated_at = NOW()
+      WHERE id = ?
+    `;
+    const [updateResult] = await dbpool.execute(updateForumQuery, [
+      title,
+      content,
+      JSON.stringify(keywords || []),
+      id,
+    ]);
+
+    if (updateResult.affectedRows === 0) {
+      return res.status(404).json({ message: "Forum not found" });
+    }
+
+    // Ambil semua reply dari forum
+    const repliesQuery = "SELECT * FROM replies WHERE forumId = ?";
+    const [repliesRows] = await dbpool.execute(repliesQuery, [id]);
+
+    // Format data forum yang telah diperbarui
+    const forumQuery = "SELECT * FROM forum WHERE id = ?";
+    const [forumRows] = await dbpool.execute(forumQuery, [id]);
+
+    let keywords = [];
+    try {
+      const rawKeywords = forumRows[0].keywords;
+      if (typeof rawKeywords === "string" && rawKeywords.trim()) {
+        keywords = JSON.parse(rawKeywords);
+      } else if (Array.isArray(rawKeywords)) {
+        keywords = rawKeywords;
+      }
+    } catch (parseError) {
+      console.error("Error parsing keywords:", parseError);
+      keywords = [];
+    }
+
+    const updatedForum = {
+      id: forumRows[0].id,
+      title: forumRows[0].title,
+      content: forumRows[0].content,
+      userId: forumRows[0].userId,
+      keywords: keywords,
+      imageUrl: forumRows[0].imageUrl,
+      createdAt: forumRows[0].created_at,
+      updatedAt: forumRows[0].updated_at,
+      replies: repliesRows.map((reply) => ({
+        id: reply.id,
+        forumId: reply.forumId,
+        userId: reply.userId,
+        content: reply.content,
+        createdAt: reply.created_at,
+        updatedAt: reply.updated_at,
+      })),
+    };
+
+    res.json({
+      message: "Forum updated successfully.",
+      forum: updatedForum,
+    });
+  } catch (error) {
+    console.error("Error updating forum:", error);
+    res.status(500).json({
+      message: "Failed to update forum.",
+      serverMessage: error.message,
+    });
+  }
+};
+const deleteReplyByAdmin = async (req, res) => {
+  const { replyId } = req.params;
+
+  try {
+    // Pastikan reply yang akan dihapus ada di dalam forum yang sesuai
+    const replyQuery = "SELECT * FROM replies WHERE id = ?";
+    const [replyRows] = await dbpool.execute(replyQuery, [replyId]);
+
+    if (replyRows.length === 0) {
+      return res.status(404).json({ message: "Reply not found." });
+    }
+
+    // Hapus reply
+    const deleteReplyQuery = "DELETE FROM replies WHERE id = ?";
+    const [deleteResult] = await dbpool.execute(deleteReplyQuery, [replyId]);
+
+    if (deleteResult.affectedRows === 0) {
+      return res.status(404).json({ message: "Reply not found." });
+    }
+
+    res.json({ message: "Reply deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting reply:", error);
+    res.status(500).json({
+      message: "Failed to delete reply.",
+      serverMessage: error.message,
+    });
+  }
+};
+
 
 // --- Export Controllers ---
 module.exports = {
@@ -341,4 +451,6 @@ module.exports = {
   getAllRepliesByForumId,
   updateReply,
   deleteReply,
+  deleteReplyByAdmin,
+  editForum
 };

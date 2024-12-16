@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const ArticleDetail = () => {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const [article, setArticle] = useState(null);
   const [latestArticles, setLatestArticles] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -37,7 +37,9 @@ const ArticleDetail = () => {
 
     const fetchCategories = async () => {
       try {
-        const response = await axios.get("http://localhost:4000/categoryArtikel");
+        const response = await axios.get(
+          "http://localhost:4000/categoryArtikel"
+        );
         setCategories(response.data);
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -71,9 +73,15 @@ const ArticleDetail = () => {
         Back to Articles
       </button>
 
-      <h1 className="text-4xl font-bold mb-4 text-black">{article.title || "No Title"}</h1>
+      <h1 className="text-4xl font-bold mb-4 text-black">
+        {article.title || "No Title"}
+      </h1>
       <div className="text-gray-600 text-sm mb-6">
-        <span>Published on: {article.createdAt ? formatDate(article.createdAt) : "Unknown Date"}</span> | 
+        <span>
+          Published on:{" "}
+          {article.createdAt ? formatDate(article.createdAt) : "Unknown Date"}
+        </span>{" "}
+        |
         <span className="font-semibold ml-2">
           Category: {getCategoryName(article.categoryArtikelId)}
         </span>
@@ -88,13 +96,21 @@ const ArticleDetail = () => {
         />
       )}
 
-      <p className="text-lg font-semibold mb-4 text-black">
-        {article.description || "No description available"}
-      </p>
+      {/* Article Content */}
+      <div className="text-lg mb-4 text-black">
+        {/* Display content with dangerouslySetInnerHTML */}
+        <div
+          dangerouslySetInnerHTML={{
+            __html: article.description || "No content available",
+          }}
+        />
+      </div>
 
       {/* Latest Articles Section */}
       <div className="mt-12">
-        <h2 className="text-2xl font-semibold mb-4 text-black">Artikel Terbaru</h2>
+        <h2 className="text-2xl font-semibold mb-4 text-black">
+          Artikel Terbaru
+        </h2>
         <div className="flex overflow-x-auto gap-8 pb-4">
           {latestArticles.slice(0, 5).map((latestArticle) => (
             <div
@@ -110,8 +126,12 @@ const ArticleDetail = () => {
                 />
               </figure>
               <div className="card-body mt-4">
-                <h3 className="text-xl font-semibold text-black mb-2">{latestArticle.title}</h3>
-                <p className="text-sm text-gray-500 mb-2">{formatDate(latestArticle.createdAt)}</p>
+                <h3 className="text-xl font-semibold text-black mb-2">
+                  {latestArticle.title}
+                </h3>
+                <p className="text-sm text-gray-500 mb-2">
+                  {formatDate(latestArticle.createdAt)}
+                </p>
                 <p className="text-gray-700 text-sm mb-4">
                   {latestArticle.description?.slice(0, 100)}...
                 </p>
@@ -123,8 +143,6 @@ const ArticleDetail = () => {
           ))}
         </div>
       </div>
-
-      
     </div>
   );
 };
